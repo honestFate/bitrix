@@ -1,83 +1,37 @@
 <?php
 /**
- * AJAX загрузчик компонента для вкладки CRM
+ * AJAX загрузчик для вкладки "Торговые точки"
+ * Делегирует работу универсальному обработчику
+ * 
  * /local/components/custom/crm.company.tab.outlets/ajax.php
  */
 
-define('NO_KEEP_STATISTIC', true);
-define('NOT_CHECK_PERMISSIONS', false);
-define('NO_AGENT_CHECK', true);
+// Устанавливаем компонент по умолчанию
+if (!isset($_REQUEST['component'])) {
+    $_REQUEST['component'] = 'crm.company.tab.outlets';
+}
+if (!isset($_GET['component'])) {
+    $_GET['component'] = 'crm.company.tab.outlets';
+}
+if (!isset($_POST['component'])) {
+    $_POST['component'] = 'crm.company.tab.outlets';
+}
 
-require_once($_SERVER['DOCUMENT_ROOT'] . '/bitrix/modules/main/include/prolog_before.php');
+// Проверяем существование универсального обработчика
+$universalAjaxPath = $_SERVER['DOCUMENT_ROOT'] . '/local/components/custom/crm.company.tab.base/ajax.php';
 
-global $APPLICATION, $USER;
-
-// Логирование
-$logFile = '/tmp/tabs.log';
-$log = "[" . date('Y-m-d H:i:s') . "] ajax.php called\n";
-file_put_contents($logFile, $log, FILE_APPEND);
-
-// Проверка авторизации
-if (!$USER->IsAuthorized()) {
-    echo 'Необходима авторизация';
-    file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] User not authorized\n", FILE_APPEND);
+if (!file_exists($universalAjaxPath)) {
+    // Если универсального обработчика нет - выводим ошибку
+    http_response_code(500);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+        'success' => false,
+        'error' => 'Универсальный AJAX обработчик не найден',
+        'expected_path' => $universalAjaxPath,
+        'hint' => 'Создайте файл /local/components/custom/crm.company.tab.base/ajax.php'
+    ], JSON_UNESCAPED_UNICODE);
     die();
 }
 
-// Получение параметров
-$action = $_REQUEST['action'] ?? '';
-$companyId = intval($_REQUEST['PARAMS']['params']['COMPANY_ID'] ?? 0);
-
-file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] Action: $action, CompanyID: $companyId\n", FILE_APPEND);
-
-if (!$companyId) {
-    print_r($_REQUEST);
-    file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] ERROR: No company ID\n", FILE_APPEND);
-    die();
-}
-
-// Подключение модулей
-use Bitrix\Main\Loader;
-
-if (!Loader::includeModule('crm')) {
-    echo 'Модуль CRM не установлен';
-    file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] ERROR: CRM module not loaded\n", FILE_APPEND);
-    die();
-}
-
-if (!Loader::includeModule('highloadblock')) {
-    echo 'Модуль Highloadblock не установлен';
-    file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] ERROR: Highloadblock module not loaded\n", FILE_APPEND);
-    die();
-}
-
-file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] Modules loaded, including component...\n", FILE_APPEND);
-
-// Подключение компонента
-ob_start();
-
-try {
-    $APPLICATION->IncludeComponent(
-        'custom:crm.company.tab.outlets',
-        '.default',
-        [
-            'COMPANY_ID' => $companyId,
-            'TAB_CODE' => 'tab_outlets',
-        ],
-        false
-    );
-    
-    $content = ob_get_clean();
-    
-    file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] Component included successfully. Content length: " . strlen($content) . "\n", FILE_APPEND);
-    
-    echo $content;
-    
-} catch (Exception $e) {
-    $error = ob_get_clean();
-    file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] ERROR: " . $e->getMessage() . "\n", FILE_APPEND);
-    file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] Output buffer: " . $error . "\n", FILE_APPEND);
-    echo 'Ошибка загрузки компонента: ' . $e->getMessage();
-}
-
-require_once($_SERVER['DOCUMENT_ROOT'] . '/bitrix/modules/main/include/epilog_after.php');
+// Делегируем работу универсальному обработчику
+require_once $universalAjaxPath;

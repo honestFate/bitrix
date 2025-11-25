@@ -21,11 +21,11 @@
             this.container = document.querySelector(config.containerId);
             
             if (!this.container) {
-                console.error('CrmHlTab: Container not found -', config.containerId);
+                console.error('[CrmHlTab] Container not found:', config.containerId);
                 return;
             }
 
-            console.log('CrmHlTab: Initialized for', config.tabCode);
+            console.log('[CrmHlTab] Initialized for', config.tabCode);
             this.bindEvents();
         },
 
@@ -140,7 +140,10 @@
          */
         showAddForm: function() {
             var form = this.container.querySelector('.crm-hl-tab-add-form');
-            if (!form) return;
+            if (!form) {
+                console.error('[CrmHlTab] Add form not found');
+                return;
+            }
 
             // Скрыть режим редактирования строк
             var editingRows = this.container.querySelectorAll('.crm-hl-tab-row.editing');
@@ -257,6 +260,8 @@
                 return;
             }
 
+            console.log('[CrmHlTab] Saving row', itemId, data);
+
             // Показать загрузку
             BX.addClass(row, 'crm-hl-tab-loading');
 
@@ -274,6 +279,7 @@
                     this.disableEditMode(row);
                     this.showNotification('Данные успешно сохранены', 'success');
                 } else {
+                    console.error('[CrmHlTab] Save error:', response.error);
                     this.showNotification(response.error || 'Ошибка при сохранении', 'error');
                 }
             }.bind(this));
@@ -295,6 +301,8 @@
                 return;
             }
 
+            console.log('[CrmHlTab] Saving new item', data);
+
             // Показать загрузку
             var saveBtn = form.querySelector('.crm-hl-tab-form-save');
             if (saveBtn) {
@@ -314,14 +322,14 @@
                 }
 
                 if (response.success) {
+                    console.log('[CrmHlTab] Item added successfully', response);
                     this.showNotification('Элемент успешно добавлен', 'success');
                     this.hideAddForm();
                     
-                    // Перезагрузить страницу для обновления данных
-                    setTimeout(function() {
-                        location.reload();
-                    }, 800);
+                    // Добавить новую строку в таблицу вместо перезагрузки
+                    this.addRowToTable(response.id, data);
                 } else {
+                    console.error('[CrmHlTab] Add error:', response.error);
                     this.showNotification(response.error || 'Ошибка при добавлении', 'error');
                 }
             }.bind(this));
@@ -344,6 +352,8 @@
                 action: 'delete'
             };
 
+            console.log('[CrmHlTab] Deleting row', itemId);
+
             // Показать загрузку
             BX.addClass(row, 'crm-hl-tab-loading');
 
@@ -358,23 +368,238 @@
                         row.remove();
                         
                         // Проверить, есть ли еще строки
-                        var rows = this.container.querySelectorAll('.crm-hl-tab-row');
+                        var tbody = this.container.querySelector('.crm-hl-tab-table tbody');
+                        var rows = tbody ? tbody.querySelectorAll('.crm-hl-tab-row') : [];
+                        
                         if (rows.length === 0) {
-                            setTimeout(function() {
-                                location.reload();
-                            }, 300);
-                        } else {
-                            // Обновить счетчик
-                            this.updateCount();
+                            // Показать пустое состояние вместо перезагрузки
+                            this.showEmptyState();
                         }
+                        
+                        // Обновить счетчик
+                        this.updateCount();
                     }.bind(this), 300);
                     
                     this.showNotification('Элемент успешно удален', 'success');
                 } else {
                     BX.removeClass(row, 'crm-hl-tab-loading');
+                    console.error('[CrmHlTab] Delete error:', response.error);
                     this.showNotification(response.error || 'Ошибка при удалении', 'error');
                 }
             }.bind(this));
+        },
+
+        /**
+         * Добавить новую строку в таблицу
+         */
+        addRowToTable: function(itemId, data) {
+            var tableWrapper = this.container.querySelector('.crm-hl-tab-table-wrapper');
+            var table = this.container.querySelector('.crm-hl-tab-table tbody');
+            var emptyState = this.container.querySelector('.crm-hl-tab-empty');
+            
+            // Если есть пустое состояние - скрыть его
+            if (emptyState) {
+                emptyState.style.display = 'none';
+            }
+            
+            // Если нет таблицы - создать
+            if (!table) {
+                // Перезагрузить страницу, т.к. нужно создать структуру таблицы
+                location.reload();
+                return;
+            }
+            
+            // Показать обертку таблицы
+            if (tableWrapper) {
+                tableWrapper.style.display = 'block';
+            }
+            
+            // Создать новую строку
+            var newRow = this.createTableRow(itemId, data);
+            if (newRow) {
+                table.appendChild(newRow);
+                
+                // Привязать события к новой строке
+                this.bindRowEvents(newRow);
+                
+                // Анимация появления
+                newRow.style.opacity = '0';
+                setTimeout(function() {
+                    newRow.style.transition = 'opacity 0.3s';
+                    newRow.style.opacity = '1';
+                }, 10);
+                
+                // Обновить счетчик
+                this.updateCount();
+            }
+        },
+
+        /**
+         * Создать HTML строки таблицы
+         */
+        createTableRow: function(itemId, data) {
+            var row = document.createElement('tr');
+            row.className = 'crm-hl-tab-row crm-hl-tab-fade-in';
+            row.dataset.itemId = itemId;
+            
+            // ID колонка
+            var idTd = document.createElement('td');
+            idTd.className = 'crm-hl-tab-td-id';
+            idTd.innerHTML = '<span class="crm-hl-tab-id-badge">' + itemId + '</span>';
+            row.appendChild(idTd);
+            
+            // Поля данных
+            for (var fieldCode in data) {
+                if (fieldCode.indexOf('UF_') === 0 && fieldCode !== 'UF_COMPANY_ID') {
+                    var td = document.createElement('td');
+                    td.className = 'crm-hl-tab-td';
+                    td.dataset.field = fieldCode;
+                    
+                    var value = data[fieldCode] || '';
+                    var displayValue = value || '<span class="crm-hl-tab-empty-value">—</span>';
+                    
+                    td.innerHTML = '<div class="crm-hl-tab-field-view">' + displayValue + '</div>';
+                    
+                    // Поле редактирования (если разрешено)
+                    if (this.config.permissions.CAN_EDIT) {
+                        var editDiv = document.createElement('div');
+                        editDiv.className = 'crm-hl-tab-field-edit';
+                        editDiv.innerHTML = '<input type="text" class="crm-hl-tab-input" value="' + 
+                                          (value || '').replace(/"/g, '&quot;') + '" data-field-code="' + fieldCode + '">';
+                        td.appendChild(editDiv);
+                    }
+                    
+                    row.appendChild(td);
+                }
+            }
+            
+            // Колонка действий
+            if (this.config.permissions.CAN_EDIT || this.config.permissions.CAN_DELETE) {
+                var actionsTd = document.createElement('td');
+                actionsTd.className = 'crm-hl-tab-td-actions';
+                
+                var actionsDiv = document.createElement('div');
+                actionsDiv.className = 'crm-hl-tab-actions';
+                
+                if (this.config.permissions.CAN_EDIT) {
+                    actionsDiv.innerHTML += `
+                        <button class="crm-hl-tab-btn crm-hl-tab-btn-edit" data-action="edit" title="Редактировать">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M11.333 2.00004C11.5081 1.82494 11.716 1.68605 11.9447 1.59129C12.1735 1.49653 12.4187 1.44775 12.6663 1.44775C12.914 1.44775 13.1592 1.49653 13.3879 1.59129C13.6167 1.68605 13.8246 1.82494 13.9997 2.00004C14.1748 2.17513 14.3137 2.383 14.4084 2.61178C14.5032 2.84055 14.552 3.08575 14.552 3.33337C14.552 3.58099 14.5032 3.82619 14.4084 4.05497C14.3137 4.28374 14.1748 4.49161 13.9997 4.66671L5.33301 13.3334L1.99967 14.3334L2.99967 11L11.333 2.00004Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                        <button class="crm-hl-tab-btn crm-hl-tab-btn-save" data-action="save" title="Сохранить">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M13.3333 4L6 11.3333L2.66667 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                        <button class="crm-hl-tab-btn crm-hl-tab-btn-cancel" data-action="cancel" title="Отменить">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    `;
+                }
+                
+                if (this.config.permissions.CAN_DELETE) {
+                    actionsDiv.innerHTML += `
+                        <button class="crm-hl-tab-btn crm-hl-tab-btn-delete" data-action="delete" title="Удалить">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M2 4H3.33333H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M5.33301 4.00004V2.66671C5.33301 2.31309 5.47348 1.97395 5.72353 1.7239C5.97358 1.47385 6.31272 1.33337 6.66634 1.33337H9.33301C9.68663 1.33337 10.0258 1.47385 10.2758 1.7239C10.5259 1.97395 10.6663 2.31309 10.6663 2.66671V4.00004M12.6663 4.00004V13.3334C12.6663 13.687 12.5259 14.0261 12.2758 14.2762C12.0258 14.5262 11.6866 14.6667 11.333 14.6667H4.66634C4.31272 14.6667 3.97358 14.5262 3.72353 14.2762C3.47348 14.0261 3.33301 13.687 3.33301 13.3334V4.00004H12.6663Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    `;
+                }
+                
+                actionsTd.appendChild(actionsDiv);
+                row.appendChild(actionsTd);
+            }
+            
+            return row;
+        },
+
+        /**
+         * Привязать события к строке
+         */
+        bindRowEvents: function(row) {
+            var self = this;
+            
+            var editBtn = row.querySelector('[data-action="edit"]');
+            if (editBtn) {
+                BX.bind(editBtn, 'click', function(e) {
+                    e.preventDefault();
+                    self.enableEditMode(row);
+                });
+            }
+            
+            var saveBtn = row.querySelector('[data-action="save"]');
+            if (saveBtn) {
+                BX.bind(saveBtn, 'click', function(e) {
+                    e.preventDefault();
+                    self.saveRow(row);
+                });
+            }
+            
+            var cancelBtn = row.querySelector('[data-action="cancel"]');
+            if (cancelBtn) {
+                BX.bind(cancelBtn, 'click', function(e) {
+                    e.preventDefault();
+                    self.disableEditMode(row);
+                });
+            }
+            
+            var deleteBtn = row.querySelector('[data-action="delete"]');
+            if (deleteBtn) {
+                BX.bind(deleteBtn, 'click', function(e) {
+                    e.preventDefault();
+                    self.deleteRow(row);
+                });
+            }
+        },
+
+        /**
+         * Показать пустое состояние
+         */
+        showEmptyState: function() {
+            var content = this.container.querySelector('.crm-hl-tab-content');
+            if (!content) return;
+            
+            var tableWrapper = content.querySelector('.crm-hl-tab-table-wrapper');
+            if (tableWrapper) {
+                tableWrapper.style.display = 'none';
+            }
+            
+            var emptyState = content.querySelector('.crm-hl-tab-empty');
+            if (!emptyState) {
+                emptyState = document.createElement('div');
+                emptyState.className = 'crm-hl-tab-empty';
+                emptyState.innerHTML = `
+                    <div class="crm-hl-tab-empty-icon">📋</div>
+                    <div class="crm-hl-tab-empty-text">Нет данных для отображения</div>
+                `;
+                
+                if (this.config.permissions.CAN_ADD) {
+                    emptyState.innerHTML += `
+                        <button class="ui-btn ui-btn-primary crm-hl-tab-add-btn-empty" data-action="add">
+                            Добавить первый элемент
+                        </button>
+                    `;
+                }
+                
+                content.appendChild(emptyState);
+                
+                // Привязать событие к кнопке
+                var addBtn = emptyState.querySelector('[data-action="add"]');
+                if (addBtn) {
+                    BX.bind(addBtn, 'click', function(e) {
+                        e.preventDefault();
+                        this.showAddForm();
+                    }.bind(this));
+                }
+            }
+            
+            emptyState.style.display = 'flex';
         },
 
         /**
@@ -474,14 +699,19 @@
          * Отправить AJAX-запрос
          */
         sendAjaxRequest: function(file, data, callback) {
+            console.log('[CrmHlTab] Sending AJAX request to', this.config.ajaxPath + file, data);
+            
             BX.ajax({
                 url: this.config.ajaxPath + file,
                 data: data,
                 method: 'POST',
                 dataType: 'json',
-                onsuccess: callback,
+                onsuccess: function(response) {
+                    console.log('[CrmHlTab] AJAX response:', response);
+                    callback(response);
+                },
                 onfailure: function(error) {
-                    console.error('AJAX Error:', error);
+                    console.error('[CrmHlTab] AJAX Error:', error);
                     this.showNotification('Ошибка при выполнении запроса. Проверьте соединение.', 'error');
                 }.bind(this)
             });
