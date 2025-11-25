@@ -1,6 +1,7 @@
 <?php
 $MESS['CRM_HL_TAB_TITLE'] = 'Данные';
 $MESS['CRM_HL_TAB_ADD_BUTTON'] = 'Добавить';
+$MESS['CRM_HL_TAB_ADD_FIRST'] = 'Добавить первый элемент';
 $MESS['CRM_HL_TAB_NO_DATA'] = 'Нет данных для отображения';
 $MESS['CRM_HL_TAB_ACTIONS'] = 'Действия';
 $MESS['CRM_HL_TAB_EDIT'] = 'Редактировать';

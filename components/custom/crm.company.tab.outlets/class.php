@@ -17,20 +17,20 @@ class CrmCompanyTabOutlets extends CrmCompanyTabBase
     {
         parent::__construct($component);
         
-        // ID Highload-блока
+        // ID Highload-блока "Торговые точки"
         $this->hlBlockId = 5;
         
         // Код вкладки
         $this->tabCode = 'tab_outlets';
         
         // Название вкладки
-        $this->tabName = Loc::getMessage('CRM_COMPANY_TAB_OUTLETS_NAME');
+        $this->tabName = 'Торговые точки';
         
         // Конфигурация полей для отображения
         $this->fieldsConfig = [
             'UF_ADDRESS' => [
                 'CODE' => 'UF_ADDRESS',
-                'NAME' => Loc::getMessage('CRM_COMPANY_TAB_OUTLETS_FIELD_ADDRESS'),
+                'NAME' => 'Адрес',
                 'TYPE' => 'string',
                 'REQUIRED' => true,
                 'EDITABLE' => true,
@@ -38,7 +38,7 @@ class CrmCompanyTabOutlets extends CrmCompanyTabBase
             ],
             'UF_COMPANY_ID' => [
                 'CODE' => 'UF_COMPANY_ID',
-                'NAME' => Loc::getMessage('CRM_COMPANY_TAB_OUTLETS_FIELD_COMPANY'),
+                'NAME' => 'Компания',
                 'TYPE' => 'crm',
                 'REQUIRED' => true,
                 'EDITABLE' => false, // Не редактируем, т.к. это связь с текущей компанией
@@ -46,7 +46,7 @@ class CrmCompanyTabOutlets extends CrmCompanyTabBase
             ],
         ];
         
-        // Настройка прав доступа (можно переопределить)
+        // Настройка прав доступа (переопределяем базовые)
         $this->permissions = [
             'canRead' => true,
             'canEdit' => true,
@@ -56,30 +56,28 @@ class CrmCompanyTabOutlets extends CrmCompanyTabBase
 
     /**
      * Переопределение метода подготовки данных элемента
-     * Можно добавить специфичную для торговых точек обработку
+     * Добавляем специфичную для торговых точек обработку
      */
     protected function prepareItemData($item)
     {
         $prepared = parent::prepareItemData($item);
         
-        // Дополнительная обработка для торговых точек
-        // Например, можно добавить геокодирование адреса
+        // Дополнительная обработка адреса
         if (!empty($prepared['UF_ADDRESS'])) {
-            $prepared['UF_ADDRESS_SHORT'] = $this->getShortAddress($prepared['UF_ADDRESS']);
+            // Можно добавить форматирование адреса, геокодирование и т.д.
+            $prepared['UF_ADDRESS_FORMATTED'] = $this->formatAddress($prepared['UF_ADDRESS']);
         }
         
         return $prepared;
     }
 
     /**
-     * Получение короткого адреса (первые 50 символов)
+     * Форматирование адреса
      */
-    private function getShortAddress($address)
+    private function formatAddress($address)
     {
-        if (mb_strlen($address) > 50) {
-            return mb_substr($address, 0, 50) . '...';
-        }
-        return $address;
+        // Простое форматирование - можно расширить
+        return trim($address);
     }
 
     /**
@@ -90,13 +88,30 @@ class CrmCompanyTabOutlets extends CrmCompanyTabBase
         $errors = [];
         
         if (empty($data['UF_ADDRESS'])) {
-            $errors[] = Loc::getMessage('CRM_COMPANY_TAB_OUTLETS_ERROR_ADDRESS_EMPTY');
+            $errors[] = 'Адрес торговой точки не может быть пустым';
+        }
+        
+        if (mb_strlen($data['UF_ADDRESS']) < 5) {
+            $errors[] = 'Адрес слишком короткий. Минимум 5 символов';
         }
         
         if (mb_strlen($data['UF_ADDRESS']) > 255) {
-            $errors[] = Loc::getMessage('CRM_COMPANY_TAB_OUTLETS_ERROR_ADDRESS_TOO_LONG');
+            $errors[] = 'Адрес слишком длинный. Максимум 255 символов';
         }
         
         return $errors;
+    }
+    
+    /**
+     * Переопределяем метод выполнения компонента
+     * Добавляем название вкладки в результат
+     */
+    public function executeComponent()
+    {
+        // Вызываем родительский метод
+        parent::executeComponent();
+        
+        // Добавляем название вкладки
+        $this->arResult['TAB_NAME'] = $this->tabName;
     }
 }
