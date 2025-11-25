@@ -9,6 +9,8 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) die();
 
 use Bitrix\Main\Page\Asset;
 
+$APPLICATION->ShowHead();
+
 $asset = Asset::getInstance();
 
 // Путь к родительскому шаблону

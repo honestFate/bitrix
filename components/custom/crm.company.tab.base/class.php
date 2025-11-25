@@ -4,7 +4,6 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) die();
 use Bitrix\Main\Loader;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Highloadblock as HL;
-use Bitrix\Main\Entity;
 
 Loc::loadMessages(__FILE__);
 
@@ -41,12 +40,12 @@ class CrmCompanyTabBase extends CBitrixComponent
     protected function checkModules()
     {
         if (!Loader::includeModule('crm')) {
-            $this->showError(Loc::getMessage('CRM_MODULE_NOT_INSTALLED'));
+            $this->showError(Loc::getMessage('CRM_MODULE_NOT_INSTALLED') ?: 'Модуль CRM не установлен');
             return false;
         }
         
         if (!Loader::includeModule('highloadblock')) {
-            $this->showError(Loc::getMessage('HIGHLOADBLOCK_MODULE_NOT_INSTALLED'));
+            $this->showError(Loc::getMessage('HIGHLOADBLOCK_MODULE_NOT_INSTALLED') ?: 'Модуль Highload-блоков не установлен');
             return false;
         }
         
@@ -59,12 +58,14 @@ class CrmCompanyTabBase extends CBitrixComponent
     protected function getHlEntity()
     {
         if (!$this->hlBlockId) {
+            AddMessage2Log("HlBlockId not set for tab {$this->tabCode}", 'crm_tabs');
             return null;
         }
 
         $hlblock = HL\HighloadBlockTable::getById($this->hlBlockId)->fetch();
         
         if (!$hlblock) {
+            AddMessage2Log("HlBlock with ID {$this->hlBlockId} not found", 'crm_tabs');
             return null;
         }
 
@@ -83,18 +84,25 @@ class CrmCompanyTabBase extends CBitrixComponent
             return [];
         }
 
-        $rsData = $entityDataClass::getList([
-            'select' => ['*'],
-            'order' => ['ID' => 'ASC'],
-            'filter' => [$this->companyLinkField => $companyId]
-        ]);
+        try {
+            $rsData = $entityDataClass::getList([
+                'select' => ['*'],
+                'order' => ['ID' => 'ASC'],
+                'filter' => [$this->companyLinkField => $companyId]
+            ]);
 
-        $result = [];
-        while ($item = $rsData->fetch()) {
-            $result[] = $this->prepareItemData($item);
+            $result = [];
+            while ($item = $rsData->fetch()) {
+                $result[] = $this->prepareItemData($item);
+            }
+
+            AddMessage2Log("Loaded " . count($result) . " items for company {$companyId} from HL {$this->hlBlockId}", 'crm_tabs');
+            
+            return $result;
+        } catch (\Exception $e) {
+            AddMessage2Log("Error loading HL data: " . $e->getMessage(), 'crm_tabs');
+            return [];
         }
-
-        return $result;
     }
 
     /**
@@ -109,15 +117,13 @@ class CrmCompanyTabBase extends CBitrixComponent
         foreach ($this->fieldsConfig as $fieldCode => $fieldConfig) {
             $value = $item[$fieldCode] ?? '';
             
-            // Обработка разных типов полей
-            switch ($fieldConfig['TYPE']) {
+            switch ($fieldConfig['TYPE'] ?? 'string') {
                 case 'string':
                 case 'text':
                     $prepared[$fieldCode] = htmlspecialcharsbx($value);
                     break;
                     
                 case 'crm':
-                    // Для CRM-полей получаем название элемента
                     $prepared[$fieldCode] = $this->getCrmElementName($value);
                     $prepared[$fieldCode . '_RAW'] = $value;
                     break;
@@ -139,7 +145,6 @@ class CrmCompanyTabBase extends CBitrixComponent
             return '';
         }
 
-        // Формат: CO_1 (Company), C_1 (Contact), L_1 (Lead)
         if (preg_match('/^CO_(\d+)$/', $value, $matches)) {
             $company = \CCrmCompany::GetByID($matches[1]);
             return $company ? $company['TITLE'] : '';
@@ -155,24 +160,42 @@ class CrmCompanyTabBase extends CBitrixComponent
     {
         global $USER;
         
-        // Проверяем базовые права CRM (ПРАВИЛЬНО: передаём 0, а не BX_CRM_PERM_NONE)
-        $crmPerms = new \CCrmPerms($USER->GetID());
+        $userId = $USER->GetID();
         
+        // Администраторы имеют полный доступ
+        if ($USER->IsAdmin()) {
+            return true;
+        }
+        
+        $crmPerms = new \CCrmPerms($userId);
+        
+        // Проверка базовых прав CRM
+        // GetPermType возвращает уровень доступа (NONE, SELF, DEPARTMENT, ALL и т.д.)
         switch ($action) {
             case 'READ':
-                $hasPermission = $this->permissions['canRead'] && 
-                                $crmPerms->HavePerm('COMPANY', 0, 'READ');
+                if (!$this->permissions['canRead']) {
+                    return false;
+                }
+                // Проверяем что есть хоть какой-то доступ на чтение (не NONE)
+                $permType = $crmPerms->GetPermType('COMPANY', 'READ');
+                $hasPermission = ($permType !== BX_CRM_PERM_NONE);
                 break;
                 
             case 'EDIT':
             case 'ADD':
-                $hasPermission = $this->permissions['canEdit'] && 
-                                $crmPerms->HavePerm('COMPANY', 0, 'WRITE');
+                if (!$this->permissions['canEdit']) {
+                    return false;
+                }
+                $permType = $crmPerms->GetPermType('COMPANY', 'WRITE');
+                $hasPermission = ($permType !== BX_CRM_PERM_NONE);
                 break;
                 
             case 'DELETE':
-                $hasPermission = $this->permissions['canDelete'] && 
-                                $crmPerms->HavePerm('COMPANY', 0, 'DELETE');
+                if (!$this->permissions['canDelete']) {
+                    return false;
+                }
+                $permType = $crmPerms->GetPermType('COMPANY', 'DELETE');
+                $hasPermission = ($permType !== BX_CRM_PERM_NONE);
                 break;
                 
             default:
@@ -182,7 +205,7 @@ class CrmCompanyTabBase extends CBitrixComponent
         // Дополнительная проверка через кастомный класс прав
         if ($hasPermission && class_exists('\CrmHlTabPermissions')) {
             $hasPermission = \CrmHlTabPermissions::checkAccess(
-                $USER->GetID(),
+                $userId,
                 $this->tabCode,
                 $action
             );
@@ -215,6 +238,8 @@ class CrmCompanyTabBase extends CBitrixComponent
      */
     public function executeComponent()
     {
+        AddMessage2Log("Executing component {$this->tabCode} for company {$this->arParams['COMPANY_ID']}", 'crm_tabs');
+        
         if (!$this->checkModules()) {
             return;
         }
@@ -222,13 +247,13 @@ class CrmCompanyTabBase extends CBitrixComponent
         $companyId = $this->arParams['COMPANY_ID'];
         
         if (!$companyId) {
-            $this->showError(Loc::getMessage('COMPANY_ID_NOT_SET'));
+            $this->showError(Loc::getMessage('COMPANY_ID_NOT_SET') ?: 'Не указан ID компании');
             return;
         }
 
         // Проверяем права на чтение
         if (!$this->checkPermissions('READ')) {
-            $this->showError(Loc::getMessage('ACCESS_DENIED'));
+            $this->showError(Loc::getMessage('ACCESS_DENIED') ?: 'Доступ запрещен');
             return;
         }
 
@@ -237,7 +262,8 @@ class CrmCompanyTabBase extends CBitrixComponent
             'ITEMS' => $this->getHlData($companyId),
             'FIELDS_CONFIG' => $this->getFieldsConfig(),
             'COMPANY_ID' => $companyId,
-            'TAB_CODE' => $this->arParams['TAB_CODE'],
+            'TAB_CODE' => $this->arParams['TAB_CODE'] ?: $this->tabCode,
+            'TAB_NAME' => $this->tabName,
             'HL_BLOCK_ID' => $this->hlBlockId,
             'PERMISSIONS' => [
                 'CAN_READ' => $this->checkPermissions('READ'),
@@ -245,7 +271,7 @@ class CrmCompanyTabBase extends CBitrixComponent
                 'CAN_ADD' => $this->checkPermissions('ADD'),
                 'CAN_DELETE' => $this->checkPermissions('DELETE'),
             ],
-            'AJAX_PATH' => '/local/ajax/crm_hl_tabs/',
+            'AJAX_PATH' => '/local/ajax/',
         ];
 
         $this->includeComponentTemplate();
@@ -256,6 +282,7 @@ class CrmCompanyTabBase extends CBitrixComponent
      */
     protected function showError($message)
     {
+        AddMessage2Log("Component error: {$message}", 'crm_tabs');
         $this->arResult['ERROR'] = $message;
         $this->includeComponentTemplate();
     }

@@ -8,6 +8,8 @@ use Bitrix\Main\Localization\Loc;
 /** @var CMain $APPLICATION */
 
 Loc::loadMessages(__FILE__);
+
+$ajaxPath = '/local/ajax/';
 ?>
 
 <div class="crm-hl-tab-container" 
@@ -15,7 +17,7 @@ Loc::loadMessages(__FILE__);
      data-tab-code="<?= htmlspecialcharsbx($arResult['TAB_CODE']) ?>" 
      data-company-id="<?= intval($arResult['COMPANY_ID']) ?>"
      data-hl-block-id="<?= intval($arResult['HL_BLOCK_ID']) ?>"
-     data-ajax-path="<?= htmlspecialcharsbx($arResult['AJAX_PATH']) ?>"
+     data-ajax-path="<?= htmlspecialcharsbx($ajaxPath) ?>"
      data-permissions='<?= CUtil::PhpToJSObject($arResult['PERMISSIONS']) ?>'>
 
     <?php if (!empty($arResult['ERROR'])): ?>

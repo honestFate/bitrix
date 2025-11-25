@@ -6,7 +6,10 @@ use Bitrix\Main\Localization\Loc;
 Loc::loadMessages(__FILE__);
 
 // Подключаем родительский класс
-require_once $_SERVER['DOCUMENT_ROOT'] . '/local/components/custom/crm.company.tab.base/class.php';
+$parentClassPath = $_SERVER['DOCUMENT_ROOT'] . '/local/components/custom/crm.company.tab.base/class.php';
+if (!class_exists('CrmCompanyTabBase') && file_exists($parentClassPath)) {
+    require_once $parentClassPath;
+}
 
 /**
  * Компонент "Торговые точки" для карточки компании
@@ -41,12 +44,12 @@ class CrmCompanyTabOutlets extends CrmCompanyTabBase
                 'NAME' => 'Компания',
                 'TYPE' => 'crm',
                 'REQUIRED' => true,
-                'EDITABLE' => false, // Не редактируем, т.к. это связь с текущей компанией
+                'EDITABLE' => false,
                 'MULTIPLE' => false,
             ],
         ];
         
-        // Настройка прав доступа (переопределяем базовые)
+        // Настройка прав доступа
         $this->permissions = [
             'canRead' => true,
             'canEdit' => true,
@@ -56,15 +59,12 @@ class CrmCompanyTabOutlets extends CrmCompanyTabBase
 
     /**
      * Переопределение метода подготовки данных элемента
-     * Добавляем специфичную для торговых точек обработку
      */
     protected function prepareItemData($item)
     {
         $prepared = parent::prepareItemData($item);
         
-        // Дополнительная обработка адреса
         if (!empty($prepared['UF_ADDRESS'])) {
-            // Можно добавить форматирование адреса, геокодирование и т.д.
             $prepared['UF_ADDRESS_FORMATTED'] = $this->formatAddress($prepared['UF_ADDRESS']);
         }
         
@@ -76,42 +76,6 @@ class CrmCompanyTabOutlets extends CrmCompanyTabBase
      */
     private function formatAddress($address)
     {
-        // Простое форматирование - можно расширить
         return trim($address);
-    }
-
-    /**
-     * Дополнительная валидация для торговых точек
-     */
-    protected function validateOutletData($data)
-    {
-        $errors = [];
-        
-        if (empty($data['UF_ADDRESS'])) {
-            $errors[] = 'Адрес торговой точки не может быть пустым';
-        }
-        
-        if (mb_strlen($data['UF_ADDRESS']) < 5) {
-            $errors[] = 'Адрес слишком короткий. Минимум 5 символов';
-        }
-        
-        if (mb_strlen($data['UF_ADDRESS']) > 255) {
-            $errors[] = 'Адрес слишком длинный. Максимум 255 символов';
-        }
-        
-        return $errors;
-    }
-    
-    /**
-     * Переопределяем метод выполнения компонента
-     * Добавляем название вкладки в результат
-     */
-    public function executeComponent()
-    {
-        // Вызываем родительский метод
-        parent::executeComponent();
-        
-        // Добавляем название вкладки
-        $this->arResult['TAB_NAME'] = $this->tabName;
     }
 }

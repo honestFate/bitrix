@@ -1,23 +1,31 @@
 <?php
 /**
- * Файл инициализации для регистрации вкладок CRM и подключения классов
+ * Файл инициализации для регистрации вкладок CRM
+ * /local/php_interface/init.php
  */
 
-use Bitrix\Main\Loader;
 use Bitrix\Main\EventManager;
 
-define('CUSTOM_LOG_FILE', '/tmp/tabs.log');
-
-// Функция логирования
-function logTab($message) {
-    $log = "[" . date('Y-m-d H:i:s') . "] " . $message . "\n";
-    file_put_contents(CUSTOM_LOG_FILE, $log, FILE_APPEND);
+// === НАСТРОЙКА ЛОГИРОВАНИЯ ===
+// Определяем путь к лог-файлу для AddMessage2Log
+if (!defined('LOG_FILENAME')) {
+    define('LOG_FILENAME', $_SERVER['DOCUMENT_ROOT'] . '/local/logs/crm_tabs.log');
 }
 
-logTab("========== INIT.PHP LOADED ==========");
+// Создаём директорию для логов если не существует
+$logDir = dirname(LOG_FILENAME);
+if (!is_dir($logDir)) {
+    @mkdir($logDir, 0755, true);
+}
+
+// Включить отладку (false на production)
+define('CRM_TAB_DEBUG', true);
 
 // Подключение класса управления правами
-require_once __DIR__ . '/classes/CrmHlTabPermissions.php';
+$permissionsClassPath = __DIR__ . '/classes/CrmHlTabPermissions.php';
+if (file_exists($permissionsClassPath)) {
+    require_once $permissionsClassPath;
+}
 
 /**
  * Регистрация вкладок в карточке компании CRM
@@ -28,44 +36,56 @@ EventManager::getInstance()->addEventHandler(
     'addCustomCrmCompanyTabs'
 );
 
-function addCustomCrmCompanyTabs($event)
+/**
+ * Обработчик добавления вкладок
+ */
+function addCustomCrmCompanyTabs(\Bitrix\Main\Event $event)
 {
-    logTab("=== Function addCustomCrmCompanyTabs called ===");
+    AddMessage2Log("=== addCustomCrmCompanyTabs called ===");
     
     $tabs = $event->getParameter('tabs');
     $entityTypeId = $event->getParameter('entityTypeID');
     $entityId = $event->getParameter('entityID');
     
-    logTab("EntityTypeID: " . var_export($entityTypeId, true));
-    logTab("EntityID: " . var_export($entityId, true));
-    logTab("Expected Company Type: " . CCrmOwnerType::Company);
+    AddMessage2Log("EntityTypeID: {$entityTypeId}, EntityID: {$entityId}, Expected Company: " . \CCrmOwnerType::Company);
     
-    // Проверяем, что это компания (entityTypeID = 4 для компаний)
-    if ($entityTypeId !== CCrmOwnerType::Company) {
-        logTab("NOT A COMPANY! Exiting...");
-        return;
+    // Проверяем, что это компания (entityTypeID = 4)
+    if ($entityTypeId !== \CCrmOwnerType::Company) {
+        AddMessage2Log("Not a company, skipping");
+        return new \Bitrix\Main\EventResult(
+            \Bitrix\Main\EventResult::SUCCESS,
+            ['tabs' => $tabs]
+        );
     }
-    
-    logTab("This is a COMPANY entity");
     
     global $USER;
     $userId = $USER->GetID();
-    logTab("Current User ID: " . $userId);
     
     // Проверка прав доступа
-    $hasAccess = CrmHlTabPermissions::checkAccess($userId, 'tab_outlets', 'READ');
-    logTab("Access check result for tab_outlets: " . ($hasAccess ? 'YES' : 'NO'));
+    $hasAccess = true;
+    if (class_exists('CrmHlTabPermissions')) {
+        $hasAccess = \CrmHlTabPermissions::checkAccess($userId, 'tab_outlets', 'READ');
+    }
+    
+    AddMessage2Log("User: {$userId}, Access for tab_outlets: " . ($hasAccess ? 'YES' : 'NO'));
     
     // Вкладка "Торговые точки"
     if ($hasAccess) {
-        logTab("Adding tab_outlets to tabs array");
-        $tabs[] = [
+        $newTab = [
             'id' => 'tab_outlets',
             'name' => 'Торговые точки',
             'loader' => [
-                'serviceUrl' => '/local/components/custom/crm.company.tab.outlets/ajax.php?action=load',
+                // ВАЖНО: путь к AJAX в /local/ajax/ (не в components!)
+                'serviceUrl' => '/local/ajax/crm_tabs_loader.php',
                 'componentData' => [
                     'template' => '.default',
+                    'signedParameters' => \Bitrix\Main\Component\ParameterSigner::signParameters(
+                        'custom:crm.company.tab.outlets',
+                        [
+                            'COMPANY_ID' => $entityId,
+                            'TAB_CODE' => 'tab_outlets',
+                        ]
+                    ),
                     'params' => [
                         'COMPANY_ID' => $entityId,
                         'TAB_CODE' => 'tab_outlets',
@@ -73,61 +93,22 @@ function addCustomCrmCompanyTabs($event)
                 ]
             ]
         ];
-    }
-    
-    logTab("Total tabs to return: " . count($tabs));
-    logTab("Tabs array: " . print_r($tabs, true));
-    
-    return new \Bitrix\Main\EventResult(\Bitrix\Main\EventResult::SUCCESS, [
-		'tabs' => $tabs,
-	]);
-}
-
-/**
- * Альтернативный способ регистрации через более старый API
- * Используйте этот вариант, если первый не работает в вашей версии Bitrix
- */
-/*
-AddEventHandler('crm', 'OnAfterCrmCompanyDetailTabShow', 'addCustomCrmCompanyTabsOld');
-
-function addCustomCrmCompanyTabsOld(&$arTabs)
-{
-    global $USER, $APPLICATION;
-    $userId = $USER->GetID();
-    
-    // Получаем ID компании из запроса
-    $companyId = intval($_REQUEST['company_id']);
-    
-    if (!$companyId) {
-        return;
-    }
-    
-    // Вкладка "Торговые точки"
-    if (CrmHlTabPermissions::checkAccess($userId, 'tab_outlets', 'READ')) {
-        ob_start();
-        $APPLICATION->IncludeComponent(
-            'custom:crm.company.tab.outlets',
-            '.default',
-            [
-                'COMPANY_ID' => $companyId,
-                'TAB_CODE' => 'tab_outlets',
-            ],
-            false
-        );
-        $content = ob_get_clean();
         
-        $arTabs[] = [
-            'DIV' => 'tab_outlets',
-            'TAB' => 'Торговые точки',
-            'TITLE' => 'Торговые точки компании',
-            'CONTENT' => $content,
-        ];
+        $tabs[] = $newTab;
+        
+        AddMessage2Log("Tab added. ServiceUrl: " . $newTab['loader']['serviceUrl']);
     }
+    
+    AddMessage2Log("Total tabs: " . count($tabs));
+    
+    return new \Bitrix\Main\EventResult(
+        \Bitrix\Main\EventResult::SUCCESS,
+        ['tabs' => $tabs]
+    );
 }
-*/
 
 /**
- * Регистрация обработчиков для автозагрузки классов компонентов
+ * Автозагрузка классов компонентов
  */
 spl_autoload_register(function ($class) {
     $classMap = [
@@ -137,33 +118,9 @@ spl_autoload_register(function ($class) {
     ];
     
     if (isset($classMap[$class])) {
-        require_once $_SERVER['DOCUMENT_ROOT'] . $classMap[$class];
+        $path = $_SERVER['DOCUMENT_ROOT'] . $classMap[$class];
+        if (file_exists($path)) {
+            require_once $path;
+        }
     }
 });
-
-/**
- * Вспомогательная функция для логирования
- * Используется для отладки прав доступа
- */
-function logCrmTabAccess($userId, $tabCode, $action, $result)
-{
-    if (defined('CRM_TAB_DEBUG') && CRM_TAB_DEBUG === true) {
-        $logFile = $_SERVER['DOCUMENT_ROOT'] . '/tmp/crm_tab_access.log';
-        $logDir = dirname($logFile);
-        
-        if (!is_dir($logDir)) {
-            mkdir($logDir, 0755, true);
-        }
-        
-        $message = sprintf(
-            "[%s] User: %d, Tab: %s, Action: %s, Result: %s\n",
-            date('Y-m-d H:i:s'),
-            $userId,
-            $tabCode,
-            $action,
-            $result ? 'ALLOWED' : 'DENIED'
-        );
-        
-        file_put_contents($logFile, $message, FILE_APPEND);
-    }
-}
