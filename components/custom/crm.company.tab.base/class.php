@@ -162,7 +162,6 @@ class CrmCompanyTabBase extends CBitrixComponent
         
         $userId = $USER->GetID();
         
-        // Администраторы имеют полный доступ
         if ($USER->IsAdmin()) {
             return true;
         }
@@ -176,7 +175,6 @@ class CrmCompanyTabBase extends CBitrixComponent
                 if (!$this->permissions['canRead']) {
                     return false;
                 }
-                // Проверяем что есть хоть какой-то доступ на чтение (не NONE)
                 $permType = $crmPerms->GetPermType('COMPANY', 'READ');
                 $hasPermission = ($permType !== BX_CRM_PERM_NONE);
                 break;
@@ -202,7 +200,6 @@ class CrmCompanyTabBase extends CBitrixComponent
                 $hasPermission = false;
         }
 
-        // Дополнительная проверка через кастомный класс прав
         if ($hasPermission && class_exists('\CrmHlTabPermissions')) {
             $hasPermission = \CrmHlTabPermissions::checkAccess(
                 $userId,

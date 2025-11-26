@@ -1,0 +1,2202 @@
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:31:48
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:31:48
+EntityTypeID: 4, EntityID: 245, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:31:48
+User: 1, Access for tab_outlets: YES
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:70
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:31:48
+Tab added. ServiceUrl: /local/ajax/crm_tabs_loader.php
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:99
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:31:48
+Total tabs: 8
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:102
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:31:50
+Module: crm_tabs
+=== CRM Tab AJAX ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:61
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:31:50
+Module: crm_tabs
+Parsed: component=crm.company.tab.outlets, companyId=245, tabCode=tab_outlets
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:153
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:31:50
+Module: crm_tabs
+Including component: crm.company.tab.outlets
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:177
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:31:50
+Module: crm_tabs
+Executing component tab_outlets for company 245
+#0: AddMessage2Log
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:241
+#1: CrmCompanyTabBase->executeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/component.php:675
+#2: CBitrixComponent->includeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/main.php:1188
+#3: CAllMain->IncludeComponent
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:190
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:31:50
+Module: crm_tabs
+Loaded 0 items for company 245 from HL 5
+#0: AddMessage2Log
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:99
+#1: CrmCompanyTabBase->getHlData
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:262
+#2: CrmCompanyTabBase->executeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/component.php:675
+#3: CBitrixComponent->includeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/main.php:1188
+#4: CAllMain->IncludeComponent
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:190
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:31:50
+Module: crm_tabs
+Output length: 3981
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:195
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:44:39
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:44:39
+EntityTypeID: 4, EntityID: 245, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:44:39
+User: 1, Access for tab_outlets: YES
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:70
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:44:39
+Tab added. ServiceUrl: /local/ajax/crm_tabs_loader.php
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:99
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:44:39
+Total tabs: 8
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:102
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:44:40
+Module: crm_tabs
+=== CRM Tab AJAX ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:61
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:44:40
+Module: crm_tabs
+Parsed: component=crm.company.tab.outlets, companyId=245, tabCode=tab_outlets
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:153
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:44:40
+Module: crm_tabs
+Including component: crm.company.tab.outlets
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:177
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:44:40
+Module: crm_tabs
+Executing component tab_outlets for company 245
+#0: AddMessage2Log
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:238
+#1: CrmCompanyTabBase->executeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/component.php:675
+#2: CBitrixComponent->includeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/main.php:1188
+#3: CAllMain->IncludeComponent
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:190
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:44:40
+Module: crm_tabs
+Loaded 0 items for company 245 from HL 5
+#0: AddMessage2Log
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:99
+#1: CrmCompanyTabBase->getHlData
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:259
+#2: CrmCompanyTabBase->executeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/component.php:675
+#3: CBitrixComponent->includeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/main.php:1188
+#4: CAllMain->IncludeComponent
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:190
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:44:40
+Module: crm_tabs
+Output length: 3981
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:195
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:44:55
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:44:55
+EntityTypeID: 4, EntityID: 245, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:44:55
+User: 1, Access for tab_outlets: YES
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:70
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:44:55
+Tab added. ServiceUrl: /local/ajax/crm_tabs_loader.php
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:99
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:44:55
+Total tabs: 8
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:102
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:44:56
+Module: crm_tabs
+=== CRM Tab AJAX ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:61
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:44:56
+Module: crm_tabs
+Parsed: component=crm.company.tab.outlets, companyId=245, tabCode=tab_outlets
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:153
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:44:56
+Module: crm_tabs
+Including component: crm.company.tab.outlets
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:177
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:44:56
+Module: crm_tabs
+Executing component tab_outlets for company 245
+#0: AddMessage2Log
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:238
+#1: CrmCompanyTabBase->executeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/component.php:675
+#2: CBitrixComponent->includeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/main.php:1188
+#3: CAllMain->IncludeComponent
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:190
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:44:56
+Module: crm_tabs
+Loaded 0 items for company 245 from HL 5
+#0: AddMessage2Log
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:99
+#1: CrmCompanyTabBase->getHlData
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:259
+#2: CrmCompanyTabBase->executeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/component.php:675
+#3: CBitrixComponent->includeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/main.php:1188
+#4: CAllMain->IncludeComponent
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:190
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:44:56
+Module: crm_tabs
+Output length: 3981
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:195
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:46:58
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:46:58
+EntityTypeID: 4, EntityID: 245, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:46:58
+User: 1, Access for tab_outlets: YES
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:70
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:46:58
+Tab added. ServiceUrl: /local/ajax/crm_tabs_loader.php
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:99
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:46:58
+Total tabs: 8
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:102
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:46:59
+Module: crm_tabs
+=== CRM Tab AJAX ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:61
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:46:59
+Module: crm_tabs
+Parsed: component=crm.company.tab.outlets, companyId=245, tabCode=tab_outlets
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:153
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:46:59
+Module: crm_tabs
+Including component: crm.company.tab.outlets
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:177
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:46:59
+Module: crm_tabs
+Executing component tab_outlets for company 245
+#0: AddMessage2Log
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:238
+#1: CrmCompanyTabBase->executeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/component.php:675
+#2: CBitrixComponent->includeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/main.php:1188
+#3: CAllMain->IncludeComponent
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:190
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:46:59
+Module: crm_tabs
+Loaded 0 items for company 245 from HL 5
+#0: AddMessage2Log
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:99
+#1: CrmCompanyTabBase->getHlData
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:259
+#2: CrmCompanyTabBase->executeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/component.php:675
+#3: CBitrixComponent->includeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/main.php:1188
+#4: CAllMain->IncludeComponent
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:190
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:46:59
+Module: crm_tabs
+Output length: 3981
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:195
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:47:53
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:47:53
+EntityTypeID: 4, EntityID: 245, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:47:53
+User: 1, Access for tab_outlets: YES
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:70
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:47:53
+Tab added. ServiceUrl: /local/ajax/crm_tabs_loader.php
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:99
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:47:53
+Total tabs: 8
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:102
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:47:54
+Module: crm_tabs
+=== CRM Tab AJAX ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:61
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:47:54
+Module: crm_tabs
+Parsed: component=crm.company.tab.outlets, companyId=245, tabCode=tab_outlets
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:153
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:47:54
+Module: crm_tabs
+Including component: crm.company.tab.outlets
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:177
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:47:54
+Module: crm_tabs
+Executing component tab_outlets for company 245
+#0: AddMessage2Log
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:238
+#1: CrmCompanyTabBase->executeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/component.php:675
+#2: CBitrixComponent->includeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/main.php:1188
+#3: CAllMain->IncludeComponent
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:190
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:47:54
+Module: crm_tabs
+Loaded 0 items for company 245 from HL 5
+#0: AddMessage2Log
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:99
+#1: CrmCompanyTabBase->getHlData
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:259
+#2: CrmCompanyTabBase->executeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/component.php:675
+#3: CBitrixComponent->includeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/main.php:1188
+#4: CAllMain->IncludeComponent
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:190
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:47:54
+Module: crm_tabs
+Output length: 3981
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:195
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:47:56
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:47:56
+EntityTypeID: 4, EntityID: 245, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:47:56
+User: 1, Access for tab_outlets: YES
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:70
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:47:56
+Tab added. ServiceUrl: /local/ajax/crm_tabs_loader.php
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:99
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:47:56
+Total tabs: 8
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:102
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:47:56
+Module: crm_tabs
+=== CRM Tab AJAX ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:61
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:47:56
+Module: crm_tabs
+Parsed: component=crm.company.tab.outlets, companyId=245, tabCode=tab_outlets
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:153
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:47:56
+Module: crm_tabs
+Including component: crm.company.tab.outlets
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:177
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:47:56
+Module: crm_tabs
+Executing component tab_outlets for company 245
+#0: AddMessage2Log
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:238
+#1: CrmCompanyTabBase->executeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/component.php:675
+#2: CBitrixComponent->includeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/main.php:1188
+#3: CAllMain->IncludeComponent
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:190
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:47:56
+Module: crm_tabs
+Loaded 0 items for company 245 from HL 5
+#0: AddMessage2Log
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:99
+#1: CrmCompanyTabBase->getHlData
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:259
+#2: CrmCompanyTabBase->executeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/component.php:675
+#3: CBitrixComponent->includeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/main.php:1188
+#4: CAllMain->IncludeComponent
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:190
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:47:56
+Module: crm_tabs
+Output length: 3981
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:195
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:08
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:08
+EntityTypeID: 4, EntityID: 245, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:08
+User: 1, Access for tab_outlets: YES
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:70
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:08
+Tab added. ServiceUrl: /local/ajax/crm_tabs_loader.php
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:99
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:08
+Total tabs: 8
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:102
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:09
+Module: crm_tabs
+=== CRM Tab AJAX ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:61
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:09
+Module: crm_tabs
+Parsed: component=crm.company.tab.outlets, companyId=245, tabCode=tab_outlets
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:153
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:09
+Module: crm_tabs
+Including component: crm.company.tab.outlets
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:177
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:09
+Module: crm_tabs
+Executing component tab_outlets for company 245
+#0: AddMessage2Log
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:238
+#1: CrmCompanyTabBase->executeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/component.php:675
+#2: CBitrixComponent->includeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/main.php:1188
+#3: CAllMain->IncludeComponent
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:190
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:09
+Module: crm_tabs
+Loaded 0 items for company 245 from HL 5
+#0: AddMessage2Log
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:99
+#1: CrmCompanyTabBase->getHlData
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:259
+#2: CrmCompanyTabBase->executeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/component.php:675
+#3: CBitrixComponent->includeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/main.php:1188
+#4: CAllMain->IncludeComponent
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:190
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:09
+Module: crm_tabs
+Output length: 3981
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:195
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:18
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:18
+EntityTypeID: 4, EntityID: 245, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:18
+User: 1, Access for tab_outlets: YES
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:70
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:18
+Tab added. ServiceUrl: /local/ajax/crm_tabs_loader.php
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:99
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:18
+Total tabs: 8
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:102
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:18
+Module: crm_tabs
+=== CRM Tab AJAX ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:61
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:18
+Module: crm_tabs
+Parsed: component=crm.company.tab.outlets, companyId=245, tabCode=tab_outlets
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:153
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:18
+Module: crm_tabs
+Including component: crm.company.tab.outlets
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:177
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:18
+Module: crm_tabs
+Executing component tab_outlets for company 245
+#0: AddMessage2Log
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:238
+#1: CrmCompanyTabBase->executeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/component.php:675
+#2: CBitrixComponent->includeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/main.php:1188
+#3: CAllMain->IncludeComponent
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:190
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:18
+Module: crm_tabs
+Loaded 0 items for company 245 from HL 5
+#0: AddMessage2Log
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:99
+#1: CrmCompanyTabBase->getHlData
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:259
+#2: CrmCompanyTabBase->executeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/component.php:675
+#3: CBitrixComponent->includeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/main.php:1188
+#4: CAllMain->IncludeComponent
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:190
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:18
+Module: crm_tabs
+Output length: 3981
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:195
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:25
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:25
+EntityTypeID: 4, EntityID: 245, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:25
+User: 1, Access for tab_outlets: YES
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:70
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:25
+Tab added. ServiceUrl: /local/ajax/crm_tabs_loader.php
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:99
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 06:48:25
+Total tabs: 8
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:102
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:27:32
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:27:32
+EntityTypeID: 4, EntityID: 245, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:27:32
+User: 1, Access for tab_outlets: YES
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:70
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:27:32
+Tab added. ServiceUrl: /local/ajax/crm_tabs_loader.php
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:99
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:27:32
+Total tabs: 8
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:102
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:27:33
+Module: crm_tabs
+=== CRM Tab AJAX ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:61
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:27:33
+Module: crm_tabs
+Parsed: component=crm.company.tab.outlets, companyId=245, tabCode=tab_outlets
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:153
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:27:33
+Module: crm_tabs
+Including component: crm.company.tab.outlets
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:177
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:27:33
+Module: crm_tabs
+Executing component tab_outlets for company 245
+#0: AddMessage2Log
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:238
+#1: CrmCompanyTabBase->executeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/component.php:675
+#2: CBitrixComponent->includeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/main.php:1188
+#3: CAllMain->IncludeComponent
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:190
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:27:33
+Module: crm_tabs
+Loaded 0 items for company 245 from HL 5
+#0: AddMessage2Log
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:99
+#1: CrmCompanyTabBase->getHlData
+	/home/bitrix/www/local/components/custom/crm.company.tab.base/class.php:259
+#2: CrmCompanyTabBase->executeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/component.php:675
+#3: CBitrixComponent->includeComponent
+	/home/bitrix/www/bitrix/modules/main/classes/general/main.php:1188
+#4: CAllMain->IncludeComponent
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:190
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:27:33
+Module: crm_tabs
+Output length: 3981
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/crm_tabs_loader.php:195
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:27:38
+Module: crm_tabs
+Save request: action=add, hlBlockId=5, companyId=245, itemId=0
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/save_data.php:66
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:27:38
+Module: crm_tabs
+Item added: ID=19
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/save_data.php:109
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:27:43
+Module: crm_tabs
+Save request: action=update, hlBlockId=5, companyId=245, itemId=19
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/save_data.php:66
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:27:43
+Module: crm_tabs
+Item updated: ID=19
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/save_data.php:140
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:27:45
+Module: crm_tabs
+Save request: action=delete, hlBlockId=5, companyId=0, itemId=19
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/save_data.php:66
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:27:46
+Module: crm_tabs
+Item deleted: ID=19
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/save_data.php:159
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:27:49
+Module: crm_tabs
+Save request: action=add, hlBlockId=5, companyId=245, itemId=0
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/save_data.php:66
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:27:49
+Module: crm_tabs
+Item added: ID=20
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/save_data.php:109
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:27:51
+Module: crm_tabs
+Save request: action=add, hlBlockId=5, companyId=245, itemId=0
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/save_data.php:66
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:27:51
+Module: crm_tabs
+Item added: ID=21
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/save_data.php:109
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:28:18
+Module: crm_tabs
+Save request: action=delete, hlBlockId=5, companyId=0, itemId=20
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/save_data.php:66
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:28:18
+Module: crm_tabs
+Item deleted: ID=20
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/save_data.php:159
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:28:19
+Module: crm_tabs
+Save request: action=delete, hlBlockId=5, companyId=0, itemId=21
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/save_data.php:66
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 07:28:19
+Module: crm_tabs
+Item deleted: ID=21
+#0: AddMessage2Log
+	/home/bitrix/www/local/ajax/save_data.php:159
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 08:26:57
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 08:26:57
+EntityTypeID: 2, EntityID: 9, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 08:26:57
+Not a company, skipping
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:54
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 08:27:23
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 08:27:23
+EntityTypeID: 2, EntityID: 12, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 08:27:23
+Not a company, skipping
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:54
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 08:27:45
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 08:27:45
+EntityTypeID: 2, EntityID: 0, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 08:27:45
+Not a company, skipping
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:54
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 08:30:02
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 08:30:02
+EntityTypeID: 2, EntityID: 0, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 08:30:02
+Not a company, skipping
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:54
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 08:30:51
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 08:30:51
+EntityTypeID: 2, EntityID: 11, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 08:30:51
+Not a company, skipping
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:54
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 08:32:18
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 08:32:18
+EntityTypeID: 2, EntityID: 11, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 08:32:18
+Not a company, skipping
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:54
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 08:32:21
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 08:32:21
+EntityTypeID: 4, EntityID: 672, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 08:32:21
+User: 1, Access for tab_outlets: YES
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:70
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 08:32:21
+Tab added. ServiceUrl: /local/ajax/crm_tabs_loader.php
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:99
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-25 08:32:21
+Total tabs: 8
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:102
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 00:18:59
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 00:18:59
+EntityTypeID: 2, EntityID: 0, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 00:18:59
+Not a company, skipping
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:54
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 02:52:02
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 02:52:02
+EntityTypeID: 2, EntityID: 0, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 02:52:02
+Not a company, skipping
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:54
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 03:05:58
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 03:05:58
+EntityTypeID: 2, EntityID: 0, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 03:05:58
+Not a company, skipping
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:54
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 03:06:16
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 03:06:16
+EntityTypeID: 2, EntityID: 8, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 03:06:16
+Not a company, skipping
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:54
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 06:56:54
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 06:56:54
+EntityTypeID: 2, EntityID: 12, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 06:56:54
+Not a company, skipping
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:54
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 07:17:03
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 07:17:03
+EntityTypeID: 2, EntityID: 0, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 07:17:03
+Not a company, skipping
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:54
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 07:17:31
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 07:17:31
+EntityTypeID: 2, EntityID: 0, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 07:17:31
+Not a company, skipping
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:54
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 07:21:15
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 07:21:15
+EntityTypeID: 2, EntityID: 12, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 07:21:15
+Not a company, skipping
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:54
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 07:21:26
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 07:21:26
+EntityTypeID: 2, EntityID: 12, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 07:21:26
+Not a company, skipping
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:54
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
