@@ -3688,3 +3688,51 @@ Output length: 0
 #0: AddMessage2Log
 	/home/bitrix/www/local/ajax/crm_tabs_loader.php:196
 ----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 08:39:08
+=== addCustomCrmCompanyTabs called ===
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:44
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 08:39:08
+EntityTypeID: 2, EntityID: 12, Expected Company: 4
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:50
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
+Host: btrx.tranzit-oil.com:443
+Date: 2025-11-26 08:39:08
+Not a company, skipping
+#0: AddMessage2Log
+	/home/bitrix/www/local/php_interface/init.php:54
+#1: addCustomCrmCompanyTabs
+	
+#2: call_user_func_array
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:445
+#3: Bitrix\Main\EventManager->sendToEventHandler
+	/home/bitrix/www/bitrix/modules/main/lib/eventmanager.php:381
+#4: Bitrix\Main\EventManager->send
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:324
+#5: CCrmEntityPopupComponent->updateTabsByEvent
+	/home/bitrix/www/bitrix/components/bitrix/crm.entity.details/class.php:117
+----------
