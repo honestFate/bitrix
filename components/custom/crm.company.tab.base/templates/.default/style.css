@@ -631,3 +631,258 @@
         transform: translateY(-10px);
     }
 }
+
+/* ===== ВКЛАДКА КОНТРАКТЫ ===== */
+
+.crm-contracts-tab {
+    padding: 24px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.crm-contracts-error {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: #fff2f0;
+    border: 1px solid #ffccc7;
+    border-radius: 8px;
+    color: #cf1322;
+}
+
+.crm-contracts-error-icon {
+    font-size: 20px;
+}
+
+.crm-contracts-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.crm-contracts-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #262626;
+}
+
+.crm-contracts-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 8px;
+    background: #f0f0f0;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #595959;
+}
+
+/* Пустое состояние */
+.crm-contracts-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.crm-contracts-empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.4;
+}
+
+.crm-contracts-empty-text {
+    font-size: 16px;
+    color: #8c8c8c;
+    margin-bottom: 8px;
+}
+
+.crm-contracts-empty-hint {
+    font-size: 13px;
+    color: #bfbfbf;
+}
+
+/* Список договоров */
+.crm-contracts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Карточка договора */
+.crm-contract-card {
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.crm-contract-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.crm-contract-card.status-active {
+    border-left: 4px solid #52c41a;
+}
+
+.crm-contract-card.status-inactive {
+    border-left: 4px solid #d9d9d9;
+    opacity: 0.7;
+}
+
+.crm-contract-card.status-expired {
+    border-left: 4px solid #ff4d4f;
+}
+
+.crm-contract-card.status-expiring {
+    border-left: 4px solid #faad14;
+}
+
+/* Заголовок карточки */
+.crm-contract-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: #fafafa;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.crm-contract-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #262626;
+}
+
+.crm-contract-status {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.crm-contract-status.status-active {
+    background: #f6ffed;
+    color: #389e0d;
+}
+
+.crm-contract-status.status-inactive {
+    background: #f5f5f5;
+    color: #8c8c8c;
+}
+
+.crm-contract-status.status-expired {
+    background: #fff2f0;
+    color: #cf1322;
+}
+
+.crm-contract-status.status-expiring {
+    background: #fffbe6;
+    color: #d48806;
+}
+
+/* Тело карточки */
+.crm-contract-body {
+    padding: 20px;
+}
+
+.crm-contract-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 16px;
+}
+
+.crm-contract-row:last-child {
+    margin-bottom: 0;
+}
+
+.crm-contract-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.crm-contract-label {
+    font-size: 12px;
+    color: #8c8c8c;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.crm-contract-value {
+    font-size: 14px;
+    color: #262626;
+}
+
+.crm-contract-money {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1890ff;
+}
+
+.crm-contract-empty-value {
+    color: #bfbfbf;
+    font-style: italic;
+}
+
+/* Файл */
+.crm-contract-file {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #f5f5f5;
+    border-radius: 6px;
+    color: #1890ff;
+    text-decoration: none;
+    font-size: 13px;
+    transition: background 0.2s;
+}
+
+.crm-contract-file:hover {
+    background: #e6f7ff;
+}
+
+.crm-contract-file small {
+    color: #8c8c8c;
+}
+
+/* Футер */
+.crm-contract-footer {
+    padding: 12px 20px;
+    background: #fafafa;
+    border-top: 1px solid #f0f0f0;
+}
+
+.crm-contract-id {
+    font-size: 12px;
+    color: #bfbfbf;
+    font-family: 'Courier New', monospace;
+}
+
+/* Адаптив */
+@media (max-width: 600px) {
+    .crm-contracts-tab {
+        padding: 16px;
+    }
+    
+    .crm-contract-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .crm-contract-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}

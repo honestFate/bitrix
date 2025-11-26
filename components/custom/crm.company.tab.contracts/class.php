@@ -14,7 +14,7 @@ if (!class_exists('CrmCompanyTabBase') && file_exists($parentClassPath)) {
 }
 
 /**
- * Компонент "Договоры" для карточки компании
+ * Компонент "Договоры" для карточки компании (только просмотр)
  */
 class CrmCompanyTabContracts extends CrmCompanyTabBase
 {
@@ -22,31 +22,26 @@ class CrmCompanyTabContracts extends CrmCompanyTabBase
     {
         parent::__construct($component);
         
-        // ID Highload-блока "Договоры"
         $this->hlBlockId = 6;
-        
-        // Код вкладки
         $this->tabCode = 'tab_contracts';
-        
-        // Название вкладки
         $this->tabName = 'Договоры';
         
-        // Конфигурация полей для отображения
+        // Конфигурация полей
         $this->fieldsConfig = [
             'UF_ACTIVE' => [
                 'CODE' => 'UF_ACTIVE',
-                'NAME' => 'Активен',
+                'NAME' => 'Статус',
                 'TYPE' => 'boolean',
                 'REQUIRED' => false,
-                'EDITABLE' => true,
+                'EDITABLE' => false,
                 'MULTIPLE' => false,
             ],
             'UF_NAME' => [
                 'CODE' => 'UF_NAME',
-                'NAME' => 'Название договора',
+                'NAME' => 'Название',
                 'TYPE' => 'string',
                 'REQUIRED' => true,
-                'EDITABLE' => true,
+                'EDITABLE' => false,
                 'MULTIPLE' => false,
             ],
             'UF_CREDIT_LIMIT' => [
@@ -54,105 +49,98 @@ class CrmCompanyTabContracts extends CrmCompanyTabBase
                 'NAME' => 'Кредитный лимит',
                 'TYPE' => 'money',
                 'REQUIRED' => true,
-                'EDITABLE' => true,
+                'EDITABLE' => false,
                 'MULTIPLE' => false,
             ],
             'UF_PAYMENT_DELAY' => [
                 'CODE' => 'UF_PAYMENT_DELAY',
-                'NAME' => 'Отсрочка (дней)',
+                'NAME' => 'Отсрочка',
                 'TYPE' => 'integer',
                 'REQUIRED' => true,
-                'EDITABLE' => true,
+                'EDITABLE' => false,
                 'MULTIPLE' => false,
             ],
             'UF_DATE_START' => [
                 'CODE' => 'UF_DATE_START',
-                'NAME' => 'Дата начала',
+                'NAME' => 'Начало',
                 'TYPE' => 'date',
                 'REQUIRED' => false,
-                'EDITABLE' => true,
+                'EDITABLE' => false,
                 'MULTIPLE' => false,
             ],
             'UF_DATE_END' => [
                 'CODE' => 'UF_DATE_END',
-                'NAME' => 'Дата окончания',
+                'NAME' => 'Окончание',
                 'TYPE' => 'date',
                 'REQUIRED' => false,
-                'EDITABLE' => true,
+                'EDITABLE' => false,
                 'MULTIPLE' => false,
             ],
             'UF_CONTRACT_FILE' => [
                 'CODE' => 'UF_CONTRACT_FILE',
-                'NAME' => 'Файл договора',
+                'NAME' => 'Файл',
                 'TYPE' => 'file',
                 'REQUIRED' => false,
-                'EDITABLE' => true,
-                'MULTIPLE' => false,
-            ],
-            'UF_COMPANY_ID' => [
-                'CODE' => 'UF_COMPANY_ID',
-                'NAME' => 'Компания',
-                'TYPE' => 'crm',
-                'REQUIRED' => true,
                 'EDITABLE' => false,
                 'MULTIPLE' => false,
             ],
         ];
         
-        // Настройка прав доступа
+        // ТОЛЬКО ПРОСМОТР - без редактирования
         $this->permissions = [
             'canRead' => true,
-            'canEdit' => true,
-            'canDelete' => true
+            'canEdit' => false,
+            'canAdd' => false,
+            'canDelete' => false
         ];
     }
 
     /**
-     * Переопределение метода подготовки данных элемента
+     * Подготовка данных элемента
      */
     protected function prepareItemData($item)
     {
-        $prepared = parent::prepareItemData($item);
+        $prepared = [
+            'ID' => $item['ID'],
+        ];
         
-        // Форматирование кредитного лимита
-        if (isset($item['UF_CREDIT_LIMIT'])) {
-            $prepared['UF_CREDIT_LIMIT'] = $item['UF_CREDIT_LIMIT'];
-            $prepared['UF_CREDIT_LIMIT_FORMATTED'] = number_format(
-                (float)$item['UF_CREDIT_LIMIT'], 
-                2, 
-                ',', 
-                ' '
-            ) . ' ₽';
-        }
+        // Активность
+        $prepared['UF_ACTIVE'] = !empty($item['UF_ACTIVE']);
+        $prepared['UF_ACTIVE_TEXT'] = $prepared['UF_ACTIVE'] ? 'Активен' : 'Неактивен';
         
-        // Форматирование дат
-        if (!empty($item['UF_DATE_START'])) {
-            $prepared['UF_DATE_START_FORMATTED'] = $this->formatDate($item['UF_DATE_START']);
-        }
-        if (!empty($item['UF_DATE_END'])) {
-            $prepared['UF_DATE_END_FORMATTED'] = $this->formatDate($item['UF_DATE_END']);
-        }
+        // Название
+        $prepared['UF_NAME'] = htmlspecialcharsbx($item['UF_NAME'] ?? '');
         
-        // Статус договора
+        // Кредитный лимит (целое число)
+        $limit = intval($item['UF_CREDIT_LIMIT'] ?? 0);
+        $prepared['UF_CREDIT_LIMIT'] = $limit;
+        $prepared['UF_CREDIT_LIMIT_FORMATTED'] = number_format($limit, 0, '', ' ') . ' ₽';
+        
+        // Отсрочка
+        $delay = intval($item['UF_PAYMENT_DELAY'] ?? 0);
+        $prepared['UF_PAYMENT_DELAY'] = $delay;
+        $prepared['UF_PAYMENT_DELAY_TEXT'] = $delay . ' ' . $this->pluralize($delay, ['день', 'дня', 'дней']);
+        
+        // Даты
+        $prepared['UF_DATE_START'] = $this->formatDate($item['UF_DATE_START'] ?? null);
+        $prepared['UF_DATE_END'] = $this->formatDate($item['UF_DATE_END'] ?? null);
+        
+        // Статус срока действия
         $prepared['STATUS'] = $this->getContractStatus($item);
-        $prepared['STATUS_CLASS'] = $this->getStatusClass($prepared['STATUS']);
         
-        // Обработка файла
+        // Файл договора
+        $prepared['UF_CONTRACT_FILE'] = null;
         if (!empty($item['UF_CONTRACT_FILE'])) {
-            $fileId = $item['UF_CONTRACT_FILE'];
-            $fileArray = \CFile::GetFileArray($fileId);
+            $fileArray = \CFile::GetFileArray($item['UF_CONTRACT_FILE']);
             if ($fileArray) {
-                $prepared['UF_CONTRACT_FILE_DATA'] = [
-                    'ID' => $fileId,
+                $prepared['UF_CONTRACT_FILE'] = [
+                    'ID' => $item['UF_CONTRACT_FILE'],
                     'NAME' => $fileArray['ORIGINAL_NAME'] ?: $fileArray['FILE_NAME'],
                     'SIZE' => \CFile::FormatSize($fileArray['FILE_SIZE']),
                     'SRC' => $fileArray['SRC'],
                 ];
             }
         }
-        
-        // Активность как текст
-        $prepared['UF_ACTIVE_TEXT'] = $item['UF_ACTIVE'] ? 'Да' : 'Нет';
         
         return $prepared;
     }
@@ -162,12 +150,19 @@ class CrmCompanyTabContracts extends CrmCompanyTabBase
      */
     private function formatDate($date)
     {
+        if (empty($date)) {
+            return '';
+        }
+        
         if ($date instanceof \Bitrix\Main\Type\Date) {
             return $date->format('d.m.Y');
         }
-        if (is_string($date) && !empty($date)) {
-            return date('d.m.Y', strtotime($date));
+        
+        if (is_string($date)) {
+            $timestamp = strtotime($date);
+            return $timestamp ? date('d.m.Y', $timestamp) : '';
         }
+        
         return '';
     }
 
@@ -176,14 +171,13 @@ class CrmCompanyTabContracts extends CrmCompanyTabBase
      */
     private function getContractStatus($item)
     {
-        // Неактивен
-        if (empty($item['UF_ACTIVE']) || $item['UF_ACTIVE'] == 0) {
-            return 'inactive';
+        if (empty($item['UF_ACTIVE'])) {
+            return ['code' => 'inactive', 'text' => 'Неактивен', 'class' => 'status-inactive'];
         }
         
-        // Проверка срока действия
         if (!empty($item['UF_DATE_END'])) {
             $endDate = $item['UF_DATE_END'];
+            
             if ($endDate instanceof \Bitrix\Main\Type\Date) {
                 $endTimestamp = $endDate->getTimestamp();
             } else {
@@ -194,28 +188,40 @@ class CrmCompanyTabContracts extends CrmCompanyTabBase
             $daysLeft = ($endTimestamp - $now) / 86400;
             
             if ($daysLeft < 0) {
-                return 'expired';
+                return ['code' => 'expired', 'text' => 'Истёк', 'class' => 'status-expired'];
             }
+            
             if ($daysLeft <= 30) {
-                return 'expiring';
+                $days = ceil($daysLeft);
+                return [
+                    'code' => 'expiring', 
+                    'text' => 'Истекает через ' . $days . ' ' . $this->pluralize($days, ['день', 'дня', 'дней']),
+                    'class' => 'status-expiring'
+                ];
             }
         }
         
-        return 'active';
+        return ['code' => 'active', 'text' => 'Активен', 'class' => 'status-active'];
     }
 
     /**
-     * CSS-класс для статуса
+     * Склонение слов
      */
-    private function getStatusClass($status)
+    private function pluralize($number, $forms)
     {
-        $classes = [
-            'active' => 'crm-contract-status-active',
-            'inactive' => 'crm-contract-status-inactive',
-            'expired' => 'crm-contract-status-expired',
-            'expiring' => 'crm-contract-status-expiring',
-        ];
+        $number = abs($number) % 100;
+        $n1 = $number % 10;
         
-        return $classes[$status] ?? '';
+        if ($number > 10 && $number < 20) {
+            return $forms[2];
+        }
+        if ($n1 > 1 && $n1 < 5) {
+            return $forms[1];
+        }
+        if ($n1 == 1) {
+            return $forms[0];
+        }
+        
+        return $forms[2];
     }
 }
