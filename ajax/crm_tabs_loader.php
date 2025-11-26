@@ -145,6 +145,7 @@ try {
     if (!$componentName && $tabCode) {
         $tabToComponent = [
             'tab_outlets' => 'crm.company.tab.outlets',
+            'tab_contracts' => 'crm.company.tab.contracts',
             // Добавляйте другие вкладки здесь
         ];
         $componentName = $tabToComponent[$tabCode] ?? null;

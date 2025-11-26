@@ -75,7 +75,6 @@ function addCustomCrmCompanyTabs(\Bitrix\Main\Event $event)
             'id' => 'tab_outlets',
             'name' => 'Торговые точки',
             'loader' => [
-                // ВАЖНО: путь к AJAX в /local/ajax/ (не в components!)
                 'serviceUrl' => '/local/ajax/crm_tabs_loader.php',
                 'componentData' => [
                     'template' => '.default',
@@ -93,6 +92,38 @@ function addCustomCrmCompanyTabs(\Bitrix\Main\Event $event)
                 ]
             ]
         ];
+
+        // Вкладка "Договоры"
+        $hasContractsAccess = true;
+        if (class_exists('CrmHlTabPermissions')) {
+            $hasContractsAccess = \CrmHlTabPermissions::checkAccess($userId, 'tab_contracts', 'READ');
+        }
+        
+        if ($hasContractsAccess) {
+            $tabs[] = [
+                'id' => 'tab_contracts',
+                'name' => 'Договоры',
+                'loader' => [
+                    'serviceUrl' => '/local/ajax/crm_tabs_loader.php',
+                    'componentData' => [
+                        'template' => '.default',
+                        'signedParameters' => \Bitrix\Main\Component\ParameterSigner::signParameters(
+                            'custom:crm.company.tab.contracts',
+                            [
+                                'COMPANY_ID' => $entityId,
+                                'TAB_CODE' => 'tab_contracts',
+                            ]
+                        ),
+                        'params' => [
+                            'COMPANY_ID' => $entityId,
+                            'TAB_CODE' => 'tab_contracts',
+                        ]
+                    ]
+                ]
+            ];
+            
+            AddMessage2Log("Tab contracts added");
+        }
         
         $tabs[] = $newTab;
         
