@@ -628,12 +628,34 @@ class HLApiHandler
         $filter = [];
         
         if (!empty($companyId)) {
-            // Поддерживаем оба формата, но в базе хранится только число
+            // Нормализуем ID компании
+            $normalizedCompanyId = null;
             if (preg_match('/^CO_(\d+)$/', $companyId, $matches)) {
-                $filter['UF_COMPANY_ID'] = $matches[1];
-            } else {
-                $filter['UF_COMPANY_ID'] = intval($companyId);
+                $normalizedCompanyId = intval($matches[1]);
+            } elseif (is_numeric($companyId)) {
+                $normalizedCompanyId = intval($companyId);
             }
+            
+            if (!$normalizedCompanyId || $normalizedCompanyId <= 0) {
+                $this->sendError('Неверный формат ID компании', 400);
+            }
+            
+            // Проверяем существование компании
+            $dbResult = \CCrmCompany::GetListEx(
+                [],
+                ['ID' => $normalizedCompanyId, 'CHECK_PERMISSIONS' => 'N'],
+                false,
+                ['nTopCount' => 1],
+                ['ID', 'TITLE']
+            );
+            
+            $company = $dbResult ? $dbResult->Fetch() : null;
+            
+            if (!$company) {
+                $this->sendError("Компания с ID {$normalizedCompanyId} не найдена", 404);
+            }
+            
+            $filter['UF_COMPANY_ID'] = $normalizedCompanyId;
         }
         
         if ($itemId > 0) {
@@ -796,6 +818,15 @@ class HLApiHandler
             $value = $this->getParam($request, $fieldCode);
             if ($value !== null) {
                 $fields[$fieldCode] = $value;
+            }
+        }
+        
+        // Автозаполнение UF_COMPANY_ID из companyId (для веб-интерфейса)
+        if (empty($fields['UF_COMPANY_ID'])) {
+            $companyId = $this->getParam($request, 'companyId');
+            if (!empty($companyId)) {
+                $fields['UF_COMPANY_ID'] = $companyId;
+                AddMessage2Log("[COLLECT] Auto-filled UF_COMPANY_ID from companyId: {$companyId}", 'hl_api');
             }
         }
         

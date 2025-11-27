@@ -326,8 +326,9 @@
                     this.showNotification('Элемент успешно добавлен', 'success');
                     this.hideAddForm();
                     
-                    // Добавить новую строку в таблицу
-                    this.addRowToTable(response.id, data);
+                    // ИСПРАВЛЕНИЕ: ID находится в response.data.id
+                    var newId = response.data ? response.data.id : response.id;
+                    this.addRowToTable(newId, data);
                 } else {
                     console.error('[CrmHlTab] Add error:', response.error);
                     this.showNotification(response.error || 'Ошибка при добавлении', 'error');
