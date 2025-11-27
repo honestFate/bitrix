@@ -23,27 +23,19 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/bitrix/modules/main/include/prolog_be
 
 header('Content-Type: application/json; charset=utf-8');
 
-// Разрешаем CORS для API (опционально)
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Authorization, X-API-Token, Content-Type');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
 
-// Обработка preflight запросов
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     die();
 }
 
-/**
- * Класс для работы с API токенами
- */
 class ApiTokenAuth
 {
     private static $tokens = null;
     
-    /**
-     * Загрузка токенов из конфига
-     */
     private static function loadTokens(): array
     {
         if (self::$tokens !== null) {
@@ -62,101 +54,67 @@ class ApiTokenAuth
         return self::$tokens;
     }
     
-    /**
-     * Получение токена из запроса
-     */
     public static function getTokenFromRequest(): ?string
     {
-        // Для отладки - логируем все заголовки
-        $headers = [];
-        foreach ($_SERVER as $key => $value) {
-            if (strpos($key, 'HTTP_') === 0) {
-                $headers[$key] = $value;
-            }
-        }
-        AddMessage2Log("[AUTH] Headers: " . json_encode($headers, JSON_UNESCAPED_UNICODE), 'hl_api');
-        
-        // 1. Bearer токен в заголовке Authorization
         $authHeader = $_SERVER['HTTP_AUTHORIZATION'] 
             ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] 
             ?? $_SERVER['HTTP_X_AUTHORIZATION']
             ?? '';
         
-        AddMessage2Log("[AUTH] Authorization header: '{$authHeader}'", 'hl_api');
-        
         if (preg_match('/Bearer\s+(.+)$/i', $authHeader, $matches)) {
-            AddMessage2Log("[AUTH] Found Bearer token", 'hl_api');
             return trim($matches[1]);
         }
         
-        // 2. X-API-Token заголовок
         $apiToken = $_SERVER['HTTP_X_API_TOKEN'] ?? null;
         if ($apiToken) {
-            AddMessage2Log("[AUTH] Found X-API-Token header", 'hl_api');
             return trim($apiToken);
         }
         
-        // 3. Параметр token в GET/POST
         $request = Application::getInstance()->getContext()->getRequest();
         $token = $request->get('token') ?? $request->getPost('token');
         if ($token) {
-            AddMessage2Log("[AUTH] Found token in request params", 'hl_api');
             return trim($token);
         }
         
-        // 4. JSON body
         $rawInput = file_get_contents('php://input');
         if (!empty($rawInput)) {
             $jsonData = json_decode($rawInput, true);
             if (isset($jsonData['token'])) {
-                AddMessage2Log("[AUTH] Found token in JSON body", 'hl_api');
                 return trim($jsonData['token']);
             }
         }
         
-        AddMessage2Log("[AUTH] No token found in request", 'hl_api');
         return null;
     }
     
-    /**
-     * Валидация токена
-     */
     public static function validate(string $token): ?array
     {
         $tokens = self::loadTokens();
         
-        AddMessage2Log("[AUTH] Validating token: " . substr($token, 0, 8) . "...", 'hl_api');
-        AddMessage2Log("[AUTH] Available tokens count: " . count($tokens), 'hl_api');
-        
-        // Проверяем токен
         if (isset($tokens[$token])) {
             AddMessage2Log("[AUTH] Token valid: " . $tokens[$token]['name'], 'hl_api');
             return $tokens[$token];
         }
         
-        // Для отладки - показываем первые 8 символов доступных токенов
-        $available = [];
-        foreach ($tokens as $t => $data) {
-            $available[] = substr($t, 0, 8) . "... ({$data['name']})";
-        }
-        AddMessage2Log("[AUTH] Available tokens: " . implode(', ', $available), 'hl_api');
         AddMessage2Log("[AUTH] Token NOT found", 'hl_api');
-        
         return null;
     }
 }
 
-/**
- * Класс валидатора
- */
 class HLApiValidator
 {
     private $errors = [];
+    private $skipCompanyExistenceCheck = false;
     
     public function getErrors(): array { return $this->errors; }
     public function hasErrors(): bool { return !empty($this->errors); }
     public function addError(string $field, string $message): void { $this->errors[$field] = $message; }
     public function clearErrors(): void { $this->errors = []; }
+    
+    public function setSkipCompanyExistenceCheck(bool $skip): void
+    {
+        $this->skipCompanyExistenceCheck = $skip;
+    }
     
     public function validateCompanyId($value): bool
     {
@@ -165,19 +123,46 @@ class HLApiValidator
             return false;
         }
         
-        if (!preg_match('/^CO_(\d+)$/', $value, $matches)) {
-            $this->addError('UF_COMPANY_ID', 'Неверный формат ID компании. Ожидается: CO_{id}');
+        // Поддерживаем оба формата: "CO_123" и просто "123"
+        $companyId = null;
+        if (preg_match('/^CO_(\d+)$/', $value, $matches)) {
+            $companyId = intval($matches[1]);
+        } elseif (is_numeric($value)) {
+            $companyId = intval($value);
+        } else {
+            $this->addError('UF_COMPANY_ID', 'Неверный формат ID компании. Ожидается: число или CO_{id}');
             return false;
         }
         
-        $companyId = intval($matches[1]);
+        if ($companyId <= 0) {
+            $this->addError('UF_COMPANY_ID', 'ID компании должен быть положительным числом');
+            return false;
+        }
+        
+        if ($this->skipCompanyExistenceCheck) {
+            AddMessage2Log("[VALIDATOR] Skipping company existence check for: {$value}", 'hl_api');
+            return true;
+        }
         
         if (!Loader::includeModule('crm')) {
             $this->addError('UF_COMPANY_ID', 'Модуль CRM не загружен');
             return false;
         }
         
-        $company = \CCrmCompany::GetByID($companyId);
+        // Используем GetListEx для надёжной проверки
+        $dbResult = \CCrmCompany::GetListEx(
+            [],
+            ['ID' => $companyId, 'CHECK_PERMISSIONS' => 'N'],
+            false,
+            ['nTopCount' => 1],
+            ['ID', 'TITLE']
+        );
+        
+        $company = $dbResult ? $dbResult->Fetch() : null;
+        
+        AddMessage2Log("[VALIDATOR] Company check for ID {$companyId}: " . 
+            ($company ? "FOUND (TITLE: {$company['TITLE']})" : 'NOT FOUND'), 'hl_api');
+        
         if (!$company) {
             $this->addError('UF_COMPANY_ID', "Компания с ID {$companyId} не найдена");
             return false;
@@ -297,9 +282,6 @@ class HLApiValidator
     }
 }
 
-/**
- * Основной класс API
- */
 class HLApiHandler
 {
     private $validator;
@@ -352,7 +334,6 @@ class HLApiHandler
     {
         try {
             AddMessage2Log("=== API Request ===", 'hl_api');
-            AddMessage2Log("Method: {$_SERVER['REQUEST_METHOD']}", 'hl_api');
             
             if (!$this->checkAuth()) {
                 $this->sendError('Необходима авторизация', 401);
@@ -366,6 +347,12 @@ class HLApiHandler
             
             $action = $this->getParam($request, 'action', 'get');
             $hlBlockId = intval($this->getParam($request, 'hlBlockId', 0));
+            
+            // Опция для пропуска проверки существования компании
+            $skipCompanyCheck = $this->getParam($request, 'skipCompanyValidation', false);
+            if ($skipCompanyCheck) {
+                $this->validator->setSkipCompanyExistenceCheck(true);
+            }
             
             AddMessage2Log("Action: {$action}, hlBlockId: {$hlBlockId}", 'hl_api');
             
@@ -402,7 +389,6 @@ class HLApiHandler
     
     private function checkAuth(): bool
     {
-        // 1. Пробуем авторизацию по токену
         $token = ApiTokenAuth::getTokenFromRequest();
         
         if ($token) {
@@ -413,26 +399,24 @@ class HLApiHandler
                 $this->userId = $tokenData['user_id'];
                 $this->authMethod = 'token';
                 
-                AddMessage2Log("[AUTH] Success via token: {$tokenData['name']}", 'hl_api');
+                if (!empty($tokenData['skip_company_validation'])) {
+                    $this->validator->setSkipCompanyExistenceCheck(true);
+                }
+                
                 return true;
             }
             
-            // Токен указан, но невалиден - сразу возвращаем ошибку
-            AddMessage2Log("[AUTH] Invalid token provided", 'hl_api');
             return false;
         }
         
-        // 2. Проверяем сессию Bitrix
         global $USER;
         
         if ($USER->IsAuthorized()) {
             $this->userId = $USER->GetID();
             $this->authMethod = 'session';
-            AddMessage2Log("[AUTH] Success via session, user: {$this->userId}", 'hl_api');
             return true;
         }
         
-        AddMessage2Log("[AUTH] No valid auth found", 'hl_api');
         return false;
     }
     
@@ -598,6 +582,14 @@ class HLApiHandler
                 case 'string':
                     $prepared[$fieldCode] = trim($value);
                     break;
+                case 'crm_company':
+                    // Сохраняем только числовой ID без префикса CO_
+                    if (preg_match('/^CO_(\d+)$/', $value, $matches)) {
+                        $prepared[$fieldCode] = $matches[1];
+                    } else {
+                        $prepared[$fieldCode] = intval($value);
+                    }
+                    break;
                 default:
                     $prepared[$fieldCode] = $value;
             }
@@ -636,7 +628,12 @@ class HLApiHandler
         $filter = [];
         
         if (!empty($companyId)) {
-            $filter['UF_COMPANY_ID'] = is_numeric($companyId) ? 'CO_' . intval($companyId) : $companyId;
+            // Поддерживаем оба формата, но в базе хранится только число
+            if (preg_match('/^CO_(\d+)$/', $companyId, $matches)) {
+                $filter['UF_COMPANY_ID'] = $matches[1];
+            } else {
+                $filter['UF_COMPANY_ID'] = intval($companyId);
+            }
         }
         
         if ($itemId > 0) {
@@ -703,6 +700,8 @@ class HLApiHandler
     {
         $entityClass = $this->getEntityClass($hlBlockId);
         $fields = $this->collectFields($request, $hlBlockId);
+        
+        AddMessage2Log("[ADD] Fields: " . json_encode($fields, JSON_UNESCAPED_UNICODE), 'hl_api');
         
         if (!$this->validateFields($hlBlockId, $fields, false)) {
             $this->sendError('Ошибка валидации', 400, $this->validator->getErrors());
