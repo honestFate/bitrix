@@ -234,6 +234,35 @@ class HLApiValidator
         return true;
     }
     
+    /**
+     * Валидация поля типа "деньги"
+     * Принимает строку вида "100,15" или "-500.00"
+     * 
+     * @param string $field Код поля
+     * @param mixed $value Значение
+     * @param string $fieldName Название поля для сообщений
+     * @return bool
+     */
+    public function validateMoney($field, $value, $fieldName = ''): bool
+    {
+        $fieldName = $fieldName ?: $field;
+        
+        if (empty($value) && $value !== '0' && $value !== 0) {
+            return true; // Пустое значение допустимо, если поле не обязательное
+        }
+        
+        // Нормализуем: заменяем запятую на точку
+        $normalizedValue = str_replace(',', '.', trim($value));
+        
+        // Проверяем формат: опциональный минус, цифры, опциональная точка с цифрами
+        if (!preg_match('/^-?\d+(\.\d{1,2})?$/', $normalizedValue)) {
+            $this->addError($field, "{$fieldName}: неверный формат суммы. Ожидается число, например: 100.50 или -500,00");
+            return false;
+        }
+        
+        return true;
+    }
+    
     public function validatePdfFile($fileId): bool
     {
         if (empty($fileId)) {
@@ -315,6 +344,7 @@ class HLApiHandler
                 'UF_PAYMENT_DELAY' => ['required' => true, 'type' => 'integer', 'min' => 0],
                 'UF_DATE_START' => ['required' => false, 'type' => 'date'],
                 'UF_DATE_END' => ['required' => false, 'type' => 'date'],
+                'UF_DEBT' => ['required' => false, 'type' => 'money', 'currency' => 'RUB'],
             ],
             'permissions' => [
                 'read' => true,
@@ -543,6 +573,9 @@ class HLApiHandler
                 case 'file_pdf':
                     $this->validator->validatePdfFile($value);
                     break;
+                case 'money':
+                    $this->validator->validateMoney($fieldCode, $value, $fieldCode);
+                    break;
             }
         }
         
@@ -590,12 +623,39 @@ class HLApiHandler
                         $prepared[$fieldCode] = intval($value);
                     }
                     break;
+                case 'money':
+                    $prepared[$fieldCode] = $this->prepareMoney($value, $fieldConfig['currency'] ?? 'RUB');
+                    break;
                 default:
                     $prepared[$fieldCode] = $value;
             }
         }
         
         return $prepared;
+    }
+    
+    /**
+     * Подготовка значения типа "деньги" для сохранения в Bitrix
+     * 
+     * @param mixed $value Входное значение (строка вида "100,50" или "-500.00")
+     * @param string $currency Код валюты (по умолчанию RUB)
+     * @return string Значение в формате Bitrix "100.50|RUB"
+     */
+    private function prepareMoney($value, $currency = 'RUB'): string
+    {
+        if (empty($value) && $value !== '0' && $value !== 0) {
+            return '';
+        }
+        
+        // Нормализуем: заменяем запятую на точку, убираем пробелы
+        $normalizedValue = str_replace([',', ' '], ['.', ''], trim($value));
+        
+        // Приводим к float и форматируем с 2 знаками после запятой
+        $floatValue = floatval($normalizedValue);
+        $formattedValue = number_format($floatValue, 2, '.', '');
+        
+        // Формат Bitrix для типа "деньги": "сумма|валюта"
+        return $formattedValue . '|' . $currency;
     }
     
     private function prepareDate($value)
@@ -694,9 +754,13 @@ class HLApiHandler
     private function prepareItemForOutput($hlBlockId, $item): array
     {
         $output = ['ID' => $item['ID']];
+        $config = $this->hlConfig[$hlBlockId]['fields'] ?? [];
         
         foreach ($item as $key => $value) {
             if ($key === 'ID') continue;
+            
+            // Проверяем тип поля в конфигурации
+            $fieldType = $config[$key]['type'] ?? null;
             
             if ($value instanceof Date) {
                 $output[$key] = $value->format('d.m.Y');
@@ -710,12 +774,53 @@ class HLApiHandler
                         'SRC' => $fileArray['SRC'],
                     ];
                 }
+            } elseif ($fieldType === 'money' && !empty($value)) {
+                // Разбираем формат Bitrix "сумма|валюта"
+                $output[$key] = $this->parseMoneyForOutput($value);
             } else {
                 $output[$key] = $value;
             }
         }
         
         return $output;
+    }
+    
+    /**
+     * Парсинг значения типа "деньги" для вывода
+     * 
+     * @param mixed $value Значение из БД (может быть строкой "100.50|RUB" или массивом)
+     * @return array Массив с value и currency
+     */
+    private function parseMoneyForOutput($value): array
+    {
+        // Если значение уже массив (некоторые версии Bitrix возвращают так)
+        if (is_array($value)) {
+            return [
+                'value' => floatval($value['VALUE'] ?? $value['SUM'] ?? 0),
+                'currency' => $value['CURRENCY'] ?? 'RUB',
+                'formatted' => number_format(floatval($value['VALUE'] ?? $value['SUM'] ?? 0), 2, '.', ' ') . ' ₽',
+            ];
+        }
+        
+        // Разбираем строку "100.50|RUB"
+        if (is_string($value) && strpos($value, '|') !== false) {
+            list($amount, $currency) = explode('|', $value, 2);
+            $floatAmount = floatval($amount);
+            
+            return [
+                'value' => $floatAmount,
+                'currency' => $currency ?: 'RUB',
+                'formatted' => number_format($floatAmount, 2, '.', ' ') . ' ₽',
+            ];
+        }
+        
+        // Если просто число
+        $floatAmount = floatval($value);
+        return [
+            'value' => $floatAmount,
+            'currency' => 'RUB',
+            'formatted' => number_format($floatAmount, 2, '.', ' ') . ' ₽',
+        ];
     }
     
     private function actionAdd($request, $hlBlockId): void

@@ -155,3 +155,15 @@ spl_autoload_register(function ($class) {
         }
     }
 });
+
+/**
+ * Автозагрузка скрипта дел в календаре
+ */
+AddEventHandler('main', 'OnProlog', function() {
+    global $APPLICATION;
+    
+    if (strpos($APPLICATION->GetCurDir(), '/calendar/') !== false 
+        || strpos($APPLICATION->GetCurDir(), '/company/personal/') !== false) {
+        \Bitrix\Main\Page\Asset::getInstance()->addJs('/local/js/calendar_activities/script.js');
+    }
+});
