@@ -1,19 +1,55 @@
 (function() {
     'use strict';
 
+    /**
+     * Интеграция CRM активностей в календарь Bitrix24
+     * Использует нативный API календаря через entriesRaw
+     */
+
     const CONFIG = {
-        color: '#FFE0B2',
-        dotColor: '#FF9800',
-        textColor: '#E65100',
-        hourHeight: 60,
-        lineHeight: 20,
-        ajaxUrl: '/local/ajax/calendar_activities.php'
+        ajaxUrl: '/local/ajax/calendar_activities.php',
+        sectionId: '4', // ID секции календаря (можно изменить)
+        color: '#FF9800',
+        textColor: '#FFFFFF',
+        entryPrefix: 'crm_activity_',
+        debug: true
+    };
+
+    function log(...args) {
+        if (CONFIG.debug) {
+            console.log('[CRM Calendar]', ...args);
+        }
+    }
+
+    // ===================
+    // Состояние
+    // ===================
+
+    const state = {
+        calendar: null,
+        initialized: false,
+        loadedActivities: new Map(),
+        currentDateFrom: null,
+        currentDateTo: null
     };
 
     // ===================
     // Утилиты
     // ===================
-    
+
+    function getCalendar() {
+        if (state.calendar) return state.calendar;
+        
+        if (window.BXEventCalendar?.instances) {
+            const keys = Object.keys(window.BXEventCalendar.instances);
+            if (keys.length > 0) {
+                state.calendar = window.BXEventCalendar.instances[keys[0]];
+                return state.calendar;
+            }
+        }
+        return null;
+    }
+
     function formatDate(date) {
         const y = date.getFullYear();
         const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -21,17 +57,295 @@
         return `${y}-${m}-${d}`;
     }
 
-    function parseDate(dateStr) {
-        const [d, m, y] = dateStr.split('.');
-        return new Date(y, m - 1, d);
+    function formatBxDate(date) {
+        const d = String(date.getDate()).padStart(2, '0');
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const y = date.getFullYear();
+        const h = String(date.getHours()).padStart(2, '0');
+        const min = String(date.getMinutes()).padStart(2, '0');
+        return `${d}.${m}.${y} ${h}:${min}:00`;
     }
+
+    function parseActivityDate(dateStr, timeStr) {
+        // dateStr: "DD.MM.YYYY", timeStr: "HH:MM"
+        const [d, m, y] = dateStr.split('.');
+        const [h, min] = (timeStr || '00:00').split(':');
+        return new Date(y, m - 1, d, h || 0, min || 0);
+    }
+
+    // ===================
+    // Загрузка активностей
+    // ===================
 
     function loadActivities(dateFrom, dateTo) {
         const url = `${CONFIG.ajaxUrl}?date_from=${dateFrom}&date_to=${dateTo}`;
-        return fetch(url).then(r => r.json()).catch(() => []);
+        log('Loading activities:', url);
+        
+        return fetch(url)
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('[CRM Calendar] API error:', data.error);
+                    return [];
+                }
+                log('Loaded', data.length, 'activities');
+                return data;
+            })
+            .catch(err => {
+                console.error('[CRM Calendar] Fetch error:', err);
+                return [];
+            });
     }
 
-    function openActivity(activityId, ownerType, ownerId) {
+    // ===================
+    // Конвертация активности в формат entriesRaw
+    // ===================
+
+    function activityToRawEntry(activity, cal) {
+        const dateFrom = parseActivityDate(activity.dateFrom, activity.timeFrom);
+        const dateTo = parseActivityDate(activity.dateTo, activity.timeTo);
+        
+        // Если время окончания <= времени начала, добавляем час
+        if (dateTo <= dateFrom) {
+            dateTo.setTime(dateFrom.getTime() + 3600000);
+        }
+
+        const ownerId = cal.util?.config?.ownerId || 1;
+        const userId = cal.util?.config?.userId || 1;
+
+        return {
+            // Основные идентификаторы
+            ID: CONFIG.entryPrefix + activity.id,
+            PARENT_ID: CONFIG.entryPrefix + activity.id,
+            
+            // Статус
+            ACTIVE: 'Y',
+            DELETED: 'N',
+            
+            // Тип и владелец
+            CAL_TYPE: 'user',
+            OWNER_ID: String(ownerId),
+            
+            // Название и описание
+            NAME: activity.title || activity.type || 'CRM Activity',
+            DESCRIPTION: activity.description || '',
+            
+            // Даты в формате Bitrix
+            DATE_FROM: formatBxDate(dateFrom),
+            DATE_TO: formatBxDate(dateTo),
+            DATE_FROM_TS_UTC: String(Math.floor(dateFrom.getTime() / 1000)),
+            DATE_TO_TS_UTC: String(Math.floor(dateTo.getTime() / 1000)),
+            DT_LENGTH: Math.floor((dateTo - dateFrom) / 1000),
+            
+            // Временная зона
+            TZ_FROM: 'Europe/Moscow',
+            TZ_TO: 'Europe/Moscow',
+            TZ_OFFSET_FROM: '10800',
+            TZ_OFFSET_TO: '10800',
+            
+            // Тип события
+            DT_SKIP_TIME: activity.isAllDay ? 'Y' : 'N',
+            
+            // Секция и цвет
+            SECT_ID: CONFIG.sectionId,
+            SECTION_ID: CONFIG.sectionId,
+            COLOR: CONFIG.color,
+            TEXT_COLOR: CONFIG.textColor,
+            
+            // Параметры встречи
+            ACCESSIBILITY: 'busy',
+            IMPORTANCE: 'normal',
+            PRIVATE_EVENT: '',
+            IS_MEETING: false,
+            MEETING_STATUS: 'Y',
+            RRULE: '',
+            ATTENDEES_CODES: [],
+            
+            // Автор
+            CREATED_BY: String(userId),
+            
+            // Разрешения
+            permissions: {
+                edit: false,
+                edit_attendees: false,
+                edit_location: false
+            },
+            
+            // Дополнительные данные для обработки клика
+            _isCrmActivity: true,
+            _activityId: activity.id,
+            _ownerType: activity.ownerType,
+            _ownerId: activity.ownerId
+        };
+    }
+
+    // ===================
+    // Добавление активностей в календарь
+    // ===================
+
+    function injectActivities(activities) {
+        const cal = getCalendar();
+        if (!cal) {
+            log('Calendar not found');
+            return;
+        }
+
+        const view = cal.getView();
+        if (!view) {
+            log('View not found');
+            return;
+        }
+
+        log('Injecting', activities.length, 'activities into', view.name, 'view');
+
+        // Удаляем старые CRM активности из entriesRaw
+        if (cal.entryController?.entriesRaw) {
+            cal.entryController.entriesRaw = cal.entryController.entriesRaw.filter(
+                e => !String(e.ID).startsWith(CONFIG.entryPrefix)
+            );
+        }
+
+        // Конвертируем и добавляем новые
+        const rawEntries = activities.map(a => activityToRawEntry(a, cal));
+        
+        if (rawEntries.length > 0 && cal.entryController?.appendToEntriesRaw) {
+            cal.entryController.appendToEntriesRaw(rawEntries);
+            log('Added', rawEntries.length, 'entries to entriesRaw');
+        }
+
+        // Пересоздаём entries и перерисовываем
+        refreshView();
+    }
+
+    function refreshView() {
+        const cal = getCalendar();
+        if (!cal) return;
+
+        const view = cal.getView();
+        if (!view) return;
+
+        try {
+            // Пересоздаём Entry объекты из сырых данных
+            if (cal.entryController?.getEntriesFromEntriesRaw) {
+                const entries = cal.entryController.getEntriesFromEntriesRaw();
+                if (entries) {
+                    view.entries = entries;
+                    log('Updated view.entries:', entries.length);
+                }
+            }
+
+            // Перерисовываем
+            if (view.redraw) {
+                view.redraw();
+                log('View redrawn');
+            }
+        } catch (e) {
+            console.error('[CRM Calendar] Refresh error:', e);
+        }
+    }
+
+    // ===================
+    // Получение диапазона дат
+    // ===================
+
+    function getDateRange() {
+        const cal = getCalendar();
+        if (!cal) return null;
+
+        const viewName = cal.currentViewName;
+        const viewDate = cal.viewRangeDate || new Date();
+
+        let dateFrom, dateTo;
+
+        if (viewName === 'day') {
+            dateFrom = new Date(viewDate);
+            dateTo = new Date(viewDate);
+        } else if (viewName === 'week') {
+            const day = viewDate.getDay() || 7;
+            dateFrom = new Date(viewDate);
+            dateFrom.setDate(viewDate.getDate() - day + 1);
+            dateTo = new Date(dateFrom);
+            dateTo.setDate(dateFrom.getDate() + 6);
+        } else {
+            // month или list
+            dateFrom = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
+            dateTo = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0);
+        }
+
+        return {
+            dateFrom: formatDate(dateFrom),
+            dateTo: formatDate(dateTo),
+            view: viewName
+        };
+    }
+
+    // ===================
+    // Главная функция обновления
+    // ===================
+
+    function update() {
+        const range = getDateRange();
+        if (!range) {
+            log('Could not get date range');
+            return;
+        }
+
+        // Проверяем не загружали ли уже этот диапазон
+        const rangeKey = `${range.dateFrom}_${range.dateTo}`;
+        if (state.currentDateFrom === range.dateFrom && state.currentDateTo === range.dateTo) {
+            log('Range already loaded, refreshing view only');
+            refreshView();
+            return;
+        }
+
+        state.currentDateFrom = range.dateFrom;
+        state.currentDateTo = range.dateTo;
+
+        log('Updating for range:', range);
+
+        loadActivities(range.dateFrom, range.dateTo)
+            .then(activities => {
+                if (activities && activities.length > 0) {
+                    injectActivities(activities);
+                } else {
+                    // Удаляем старые если нет новых
+                    injectActivities([]);
+                }
+            });
+    }
+
+    // ===================
+    // Обработка клика на активность
+    // ===================
+
+    function openActivitySlider(activityId) {
+        // Открываем слайдер просмотра/редактирования активности CRM
+        const url = `/crm/activity/?act=view&id=${activityId}`;
+        
+        if (typeof BX !== 'undefined' && BX.CrmActivityEditor) {
+            // Используем нативный редактор активностей CRM
+            BX.CrmActivityEditor.viewActivity(activityId);
+            return true;
+        }
+        
+        if (typeof BX !== 'undefined' && BX.Crm?.Activity?.TodoEditor) {
+            // Bitrix24 новый редактор дел
+            BX.Crm.Activity.TodoEditor.open({ activityId: activityId });
+            return true;
+        }
+
+        if (typeof BX !== 'undefined' && BX.SidePanel?.Instance) {
+            // Fallback - открываем в слайдере
+            BX.SidePanel.Instance.open(url, { width: 700 });
+            return true;
+        }
+        
+        // Последний fallback
+        window.open(url, '_blank');
+        return true;
+    }
+
+    function openOwnerCard(ownerType, ownerId) {
         const urls = {
             lead: `/crm/lead/details/${ownerId}/`,
             deal: `/crm/deal/details/${ownerId}/`,
@@ -39,613 +353,319 @@
             company: `/crm/company/details/${ownerId}/`
         };
         const url = urls[ownerType] || urls.deal;
-        
-        if (BX.SidePanel && BX.SidePanel.Instance) {
-            BX.SidePanel.Instance.open(url);
+
+        if (typeof BX !== 'undefined' && BX.SidePanel?.Instance) {
+            BX.SidePanel.Instance.open(url, { width: 1000 });
         } else {
             window.open(url, '_blank');
         }
     }
 
-    // ===================
-    // Определение вида календаря (улучшенное)
-    // ===================
+    function handleCrmActivityClick(entry, event) {
+        if (!entry?.data?._isCrmActivity) {
+            return false;
+        }
 
-    function getCalendarView() {
-        // Проверяем контейнеры в порядке приоритета
-        const dayContainer = document.querySelector('.calendar-grid-day-container');
-        const weekContainer = document.querySelector('.calendar-grid-week-container');
-        const monthContainer = document.querySelector('.calendar-grid-month-container');
-        
-        // Проверяем видимость контейнеров
-        if (dayContainer && dayContainer.offsetParent !== null) {
-            return 'day';
+        const data = entry.data;
+        log('CRM activity clicked:', data._activityId, data);
+
+        // Предотвращаем стандартное поведение календаря
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
         }
-        if (weekContainer && weekContainer.offsetParent !== null) {
-            return 'week';
+
+        // Открываем активность
+        openOwnerCard(data._ownerType, data._ownerId);
+
+        return true;
+    }
+
+    function findEntryByElement(element) {
+        const cal = getCalendar();
+        if (!cal) return null;
+
+        const view = cal.getView();
+        if (!view?.entries) return null;
+
+        // Ищем ID события в атрибутах или родителях
+        let entryWrap = element.closest('[data-bx-calendar-entry]');
+        if (!entryWrap) {
+            entryWrap = element.closest('.calendar-event-block-wrap');
         }
-        if (monthContainer && monthContainer.offsetParent !== null) {
-            return 'month';
+        if (!entryWrap) {
+            entryWrap = element.closest('.calendar-grid-month-event-slot');
         }
+
+        if (!entryWrap) return null;
+
+        // Пробуем получить ID из атрибута
+        let entryId = entryWrap.getAttribute('data-bx-calendar-entry');
         
-        // Fallback по наличию элементов
-        if (dayContainer) return 'day';
-        if (weekContainer) return 'week';
-        if (monthContainer) return 'month';
-        
+        // Или из data-entry-id
+        if (!entryId) {
+            entryId = entryWrap.dataset.entryId;
+        }
+
+        // Ищем по ID в entries
+        if (entryId) {
+            const entry = view.entries.find(e => 
+                String(e.id) === String(entryId) || 
+                e.uid === entryId
+            );
+            if (entry) return entry;
+        }
+
+        // Fallback: ищем по уникальным данным в элементе
+        // Проверяем текст названия
+        const titleEl = entryWrap.querySelector('.calendar-event-block-title, .calendar-item-content-name');
+        if (titleEl) {
+            const title = titleEl.textContent.trim();
+            const entry = view.entries.find(e => 
+                e.name === title && e.data?._isCrmActivity
+            );
+            if (entry) return entry;
+        }
+
         return null;
     }
 
-    function getVisibleDateRange() {
-        const view = getCalendarView();
-        let dateFrom, dateTo;
-
-        if (view === 'day') {
-            const dayCell = document.querySelector('.calendar-grid-day-container [data-bx-calendar-timeline-day]');
-            if (dayCell) {
-                const dateStr = dayCell.getAttribute('data-bx-calendar-timeline-day');
-                const date = new Date(dateStr);
-                return { dateFrom: formatDate(date), dateTo: formatDate(date), view };
-            }
-        }
-
-        if (view === 'week') {
-            const weekCells = document.querySelectorAll('.calendar-grid-week-container [data-bx-calendar-timeline-day]');
-            if (weekCells.length >= 7) {
-                const firstDate = new Date(weekCells[0].getAttribute('data-bx-calendar-timeline-day'));
-                const lastDate = new Date(weekCells[6].getAttribute('data-bx-calendar-timeline-day'));
-                return { dateFrom: formatDate(firstDate), dateTo: formatDate(lastDate), view };
-            }
-        }
-
-        if (view === 'month') {
-            const todayCell = document.querySelector('.calendar-grid-month-container .calendar-grid-today');
-            if (todayCell) {
-                const attr = todayCell.getAttribute('data-bx-calendar-timeline-day');
-                if (attr) {
-                    const today = new Date(attr);
-                    dateFrom = new Date(today.getFullYear(), today.getMonth(), 1);
-                    dateTo = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-                    return { dateFrom: formatDate(dateFrom), dateTo: formatDate(dateTo), view };
-                }
-            }
-            
-            // Fallback - ищем любую ячейку с датой
-            const anyCell = document.querySelector('.calendar-grid-month-container [data-bx-calendar-timeline-day]');
-            if (anyCell) {
-                const attr = anyCell.getAttribute('data-bx-calendar-timeline-day');
-                const date = new Date(attr);
-                dateFrom = new Date(date.getFullYear(), date.getMonth(), 1);
-                dateTo = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-                return { dateFrom: formatDate(dateFrom), dateTo: formatDate(dateTo), view };
-            }
-        }
-
-        // Последний fallback
-        const now = new Date();
-        return { 
-            dateFrom: formatDate(new Date(now.getFullYear(), now.getMonth(), 1)),
-            dateTo: formatDate(new Date(now.getFullYear(), now.getMonth() + 1, 0)),
-            view: view || 'month'
-        };
-    }
-
     // ===================
-    // Создание элементов
-    // ===================
-
-    // Вид "Месяц"
-    function createMonthElement(activity, dayIndex, topOffset) {
-        const el = document.createElement('div');
-        el.className = 'calendar-event-line-wrap calendar-event-line-fill calendar-activity-item';
-        el.dataset.activityId = activity.id;
-        el.style.cssText = `
-            top: ${topOffset}px;
-            left: calc(${dayIndex * 14.2857}% + 2px);
-            width: calc(14.2857% - 5px);
-            cursor: pointer;
-        `;
-
-        el.innerHTML = `
-            <div class="calendar-event-line-inner-container" style="background-color: ${CONFIG.color} !important; border-color: ${CONFIG.color} !important;">
-                <div class="calendar-event-line-inner" style="display: flex !important; align-items: center !important;">
-                    <div style="width: 6px !important; height: 6px !important; border-radius: 50% !important; background-color: ${CONFIG.dotColor} !important; flex-shrink: 0 !important; margin-right: 5px !important;"></div>
-                    <span style="color: ${CONFIG.textColor} !important; flex: 1 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important;">
-                        <span title="${activity.type}: ${activity.title}">${activity.title}</span>
-                    </span>
-                    <span style="color: ${CONFIG.textColor} !important; flex-shrink: 0 !important; margin-left: 5px !important; font-size: 11px !important;">${activity.timeFrom}</span>
-                </div>
-            </div>
-        `;
-
-        el.addEventListener('click', (e) => {
-            e.stopPropagation();
-            openActivity(activity.id, activity.ownerType, activity.ownerId);
-        });
-
-        return el;
-    }
-
-    // Вид "Неделя" - блоки в сетке времени
-    function createWeekBlockElement(activity, dayIndex, top, height, horizontalOffset, totalOverlapping) {
-        // Рассчитываем ширину и позицию для перекрывающихся событий
-        const baseLeft = dayIndex * 14.2857;
-        const widthPercent = 14.2857 / totalOverlapping;
-        const leftOffset = widthPercent * horizontalOffset;
-        
-        const el = document.createElement('div');
-        el.className = 'calendar-event-block-wrap calendar-activity-item';
-        el.dataset.activityId = activity.id;
-        el.style.cssText = `
-            position: absolute !important;
-            top: ${top}px !important;
-            height: ${height}px !important;
-            left: calc(${baseLeft + leftOffset}% + 2px) !important;
-            width: calc(${widthPercent}% - 4px) !important;
-            z-index: ${100 + horizontalOffset} !important;
-            cursor: pointer !important;
-        `;
-
-        el.innerHTML = `
-            <div style="
-                background-color: ${CONFIG.dotColor} !important; 
-                border-radius: 4px !important; 
-                padding: 2px 6px !important; 
-                height: 100% !important; 
-                overflow: hidden !important;
-                display: flex !important;
-                flex-direction: column !important;
-            ">
-                <span style="color: #fff !important; font-size: 12px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;">
-                    ${activity.title}
-                </span>
-                <span style="color: rgba(255,255,255,0.9) !important; font-size: 10px !important; white-space: nowrap !important;">
-                    ${activity.timeFrom}–${activity.timeTo}
-                </span>
-            </div>
-        `;
-
-        el.addEventListener('click', (e) => {
-            e.stopPropagation();
-            openActivity(activity.id, activity.ownerType, activity.ownerId);
-        });
-
-        return el;
-    }
-
-    // Вид "День"
-    function createDayElement(activity, top, height, horizontalOffset, totalOverlapping) {
-        const widthPercent = 50 / totalOverlapping;
-        const leftOffset = 50 + (widthPercent * horizontalOffset);
-        
-        const el = document.createElement('div');
-        el.className = 'calendar-event-block-wrap calendar-activity-item';
-        el.dataset.activityId = activity.id;
-        el.style.cssText = `
-            position: absolute !important;
-            top: ${top}px !important;
-            height: ${height}px !important;
-            left: calc(${leftOffset}% + 2px) !important;
-            width: calc(${widthPercent}% - 4px) !important;
-            z-index: ${100 + horizontalOffset} !important;
-            cursor: pointer !important;
-        `;
-
-        el.innerHTML = `
-            <div style="
-                background-color: ${CONFIG.dotColor} !important; 
-                border-radius: 4px !important; 
-                padding: 4px 8px !important; 
-                height: 100% !important; 
-                overflow: hidden !important;
-                display: flex !important;
-                flex-direction: column !important;
-            ">
-                <span style="color: #fff !important; font-size: 12px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;">
-                    ${activity.title}
-                </span>
-                <span style="color: rgba(255,255,255,0.9) !important; font-size: 11px !important;">
-                    ${activity.timeFrom}–${activity.timeTo}
-                </span>
-            </div>
-        `;
-
-        el.addEventListener('click', (e) => {
-            e.stopPropagation();
-            openActivity(activity.id, activity.ownerType, activity.ownerId);
-        });
-
-        return el;
-    }
-
-    // ===================
-    // Группировка перекрывающихся событий
-    // ===================
-    
-    function groupOverlappingActivities(activities) {
-        // Группируем по дате и времени
-        const groups = {};
-        
-        activities.forEach(activity => {
-            const key = `${activity.dateFrom}_${activity.timeFrom}`;
-            if (!groups[key]) {
-                groups[key] = [];
-            }
-            groups[key].push(activity);
-        });
-        
-        // Добавляем информацию о позиции
-        const result = [];
-        Object.values(groups).forEach(group => {
-            group.forEach((activity, idx) => {
-                result.push({
-                    ...activity,
-                    horizontalOffset: idx,
-                    totalOverlapping: group.length
-                });
-            });
-        });
-        
-        return result;
-    }
-
-    // ===================
-    // Вид "Месяц" (простой вариант)
-    // ===================
-
-    function renderMonth(activities) {
-        const holder = document.querySelector('.calendar-grid-month-container .calendar-grid-month-events-holder');
-        if (!holder) {
-            console.log('[CalendarActivities] Month holder not found');
-            return;
-        }
-
-        const range = getVisibleDateRange();
-        const firstDayOfMonth = new Date(range.dateFrom);
-        const firstDayWeekday = (firstDayOfMonth.getDay() || 7) - 1;
-
-        // Находим максимальный top + height для каждой колонки (дня недели) в каждой строке
-        const occupiedSpace = {}; // ключ: "weekIndex-dayIndex", значение: maxBottom
-        
-        holder.querySelectorAll('.calendar-event-line-wrap:not(.calendar-activity-item)').forEach(el => {
-            const top = parseFloat(el.style.top) || 0;
-            const left = el.style.left || '0';
-            
-            // Определяем dayIndex по left
-            let dayIndex = 0;
-            for (let i = 0; i < 7; i++) {
-                const expectedLeft = i * 14.2857;
-                if (left.includes(`${expectedLeft}%`) || left.includes(`calc(${expectedLeft}%`)) {
-                    dayIndex = i;
-                    break;
-                }
-                // Проверяем числовое значение
-                const leftNum = parseFloat(left);
-                if (!isNaN(leftNum) && Math.abs(leftNum - expectedLeft) < 2) {
-                    dayIndex = i;
-                    break;
-                }
-            }
-            
-            // Определяем weekIndex по top (примерно 100-120px на строку)
-            const weekIndex = Math.floor(top / 100);
-            
-            const key = `${weekIndex}-${dayIndex}`;
-            const bottom = top + CONFIG.lineHeight + 1;
-            
-            if (!occupiedSpace[key] || occupiedSpace[key] < bottom) {
-                occupiedSpace[key] = bottom;
-            }
-        });
-        
-        console.log('[CalendarActivities] Occupied space:', occupiedSpace);
-
-        // Группируем по дате
-        const byDate = {};
-        activities.forEach(a => {
-            if (!byDate[a.dateFrom]) byDate[a.dateFrom] = [];
-            byDate[a.dateFrom].push(a);
-        });
-
-        Object.keys(byDate).forEach(dateStr => {
-            const date = parseDate(dateStr);
-            const dayOfMonth = date.getDate();
-            const dayIndex = (firstDayWeekday + dayOfMonth - 1) % 7;
-            const weekIndex = Math.floor((firstDayWeekday + dayOfMonth - 1) / 7);
-            
-            const key = `${weekIndex}-${dayIndex}`;
-            const startTop = occupiedSpace[key] || 0;
-            
-            byDate[dateStr].forEach((activity, idx) => {
-                const topOffset = startTop + idx * (CONFIG.lineHeight + 1);
-                const el = createMonthElement(activity, dayIndex, topOffset);
-                holder.appendChild(el);
-                
-                // Обновляем занятое пространство
-                occupiedSpace[key] = topOffset + CONFIG.lineHeight + 1;
-            });
-        });
-
-        console.log('[CalendarActivities] Month rendered:', activities.length, 'activities');
-    }
-
-    function renderWeek(activities) {
-        const holder = document.querySelector('.calendar-grid-week-container .calendar-grid-week-row > .calendar-grid-week-events-holder');
-        if (!holder) {
-            console.log('[CalendarActivities] Week holder not found');
-            return;
-        }
-
-        const range = getVisibleDateRange();
-        const weekStart = new Date(range.dateFrom);
-        
-        // Группируем перекрывающиеся
-        const groupedActivities = groupOverlappingActivities(activities);
-
-        groupedActivities.forEach(activity => {
-            const activityDate = parseDate(activity.dateFrom);
-            const dayIndex = Math.round((activityDate - weekStart) / (1000 * 60 * 60 * 24));
-            
-            if (dayIndex < 0 || dayIndex > 6) return;
-
-            const [startH, startM] = activity.timeFrom.split(':').map(Number);
-            const [endH, endM] = activity.timeTo.split(':').map(Number);
-            
-            const top = (startH * 60) + startM;
-            const endTop = (endH * 60) + endM;
-            const height = Math.max(endTop - top, 30);
-
-            const el = createWeekBlockElement(
-                activity, 
-                dayIndex, 
-                top, 
-                height, 
-                activity.horizontalOffset, 
-                activity.totalOverlapping
-            );
-            holder.appendChild(el);
-        });
-
-        console.log('[CalendarActivities] Week rendered:', activities.length, 'activities');
-    }
-
-    // ===================
-    // Главная функция (обновлённая)
-    // ===================
-
-    function injectActivities(forceDate, forceView) {
-        // Удаляем старые наши элементы
-        document.querySelectorAll('.calendar-activity-item').forEach(el => el.remove());
-
-        let dateFrom, dateTo;
-        let view = forceView || getCalendarView();
-        
-        console.log('[CalendarActivities] View:', view, '(forced:', !!forceView, ')');
-        
-        if (forceDate) {
-            const date = forceDate instanceof Date ? forceDate : new Date(forceDate);
-            
-            if (view === 'day') {
-                dateFrom = formatDate(date);
-                dateTo = formatDate(date);
-            } else if (view === 'week') {
-                const day = date.getDay() || 7;
-                const monday = new Date(date);
-                monday.setDate(date.getDate() - day + 1);
-                const sunday = new Date(monday);
-                sunday.setDate(monday.getDate() + 6);
-                dateFrom = formatDate(monday);
-                dateTo = formatDate(sunday);
-            } else {
-                dateFrom = formatDate(new Date(date.getFullYear(), date.getMonth(), 1));
-                dateTo = formatDate(new Date(date.getFullYear(), date.getMonth() + 1, 0));
-            }
-            
-            console.log('[CalendarActivities] Using forced date:', dateFrom, '-', dateTo);
-        } else {
-            const range = getVisibleDateRange();
-            dateFrom = range.dateFrom;
-            dateTo = range.dateTo;
-            if (!forceView) {
-                view = range.view;
-            }
-        }
-        
-        console.log('[CalendarActivities] Final - View:', view, '| Range:', dateFrom, '-', dateTo);
-        
-        if (!view) {
-            console.log('[CalendarActivities] View not detected');
-            return;
-        }
-
-        loadActivities(dateFrom, dateTo).then(activities => {
-            console.log('[CalendarActivities] Loaded:', activities.length, 'activities');
-            
-            if (!activities || !activities.length) return;
-
-            // Используем переданный view, не перепроверяем
-            switch (view) {
-                case 'month':
-                    renderMonth(activities);
-                    break;
-                case 'week':
-                    renderWeek(activities);
-                    break;
-                case 'day':
-                    renderDay(activities, dateFrom);
-                    break;
-            }
-        });
-    }
-
-    // ===================
-    // Рендеринг дня (обновлённый)
-    // ===================
-
-    function renderDay(activities, forceDateFrom) {
-        const holder = document.querySelector('.calendar-grid-day-container .calendar-grid-day-events-holder');
-        if (!holder) {
-            console.log('[CalendarActivities] Day holder not found');
-            return;
-        }
-
-        // Используем переданную дату или берём из DOM
-        let currentDayStr = forceDateFrom;
-        
-        if (!currentDayStr) {
-            const dayCell = document.querySelector('.calendar-grid-day-container [data-bx-calendar-timeline-day]');
-            if (dayCell) {
-                const dateStr = dayCell.getAttribute('data-bx-calendar-timeline-day');
-                const date = new Date(dateStr);
-                currentDayStr = String(date.getDate()).padStart(2, '0') + '.' + 
-                            String(date.getMonth() + 1).padStart(2, '0') + '.' + 
-                            date.getFullYear();
-            }
-        }
-
-        // Конвертируем формат даты если нужно (YYYY-MM-DD -> DD.MM.YYYY)
-        if (currentDayStr && currentDayStr.includes('-')) {
-            const [y, m, d] = currentDayStr.split('-');
-            currentDayStr = `${d}.${m}.${y}`;
-        }
-
-        console.log('[CalendarActivities] Day filter date:', currentDayStr);
-
-        // Фильтруем только дела на текущий день
-        const dayActivities = activities.filter(a => {
-            const match = !currentDayStr || a.dateFrom === currentDayStr;
-            if (!match) {
-                console.log('[CalendarActivities] Filtered out:', a.dateFrom, '!==', currentDayStr);
-            }
-            return match;
-        });
-        
-        console.log('[CalendarActivities] Day activities after filter:', dayActivities.length);
-        
-        // Группируем перекрывающиеся
-        const groupedActivities = groupOverlappingActivities(dayActivities);
-
-        groupedActivities.forEach(activity => {
-            const [startH, startM] = activity.timeFrom.split(':').map(Number);
-            const [endH, endM] = activity.timeTo.split(':').map(Number);
-            
-            const top = (startH * 60) + startM;
-            const endTop = (endH * 60) + endM;
-            const height = Math.max(endTop - top, 30);
-
-            const el = createDayElement(
-                activity, 
-                top, 
-                height,
-                activity.horizontalOffset,
-                activity.totalOverlapping
-            );
-            holder.appendChild(el);
-        });
-
-        console.log('[CalendarActivities] Day rendered:', dayActivities.length, 'activities');
-    }
-
-    // ===================
-    // Инициализация (исправленная v3)
+    // Инициализация
     // ===================
 
     function init() {
-        console.log('[CalendarActivities] Initializing...');
-        
-        let changeViewRangeTimer = null;
-        let pendingDate = null;
-        let viewChangeInProgress = false;
-        let currentViewName = null;
+        log('Initializing...');
 
-        if (typeof BX !== 'undefined' && BX.addCustomEvent) {
-            // Начало смены вида
-            BX.addCustomEvent('beforesetview', function(params) {
-                console.log('[CalendarActivities] beforesetview:', params.currentViewName, '->', params.newViewName);
-                viewChangeInProgress = true;
-                currentViewName = params.newViewName;
-                
-                if (changeViewRangeTimer) {
-                    clearTimeout(changeViewRangeTimer);
-                    changeViewRangeTimer = null;
-                    pendingDate = null;
-                }
-            });
-            
-            // После смены вида
-            BX.addCustomEvent('aftersetview', function(params) {
-                const viewName = params.viewName || currentViewName;
-                console.log('[CalendarActivities] aftersetview, viewName:', viewName);
-                viewChangeInProgress = false;
-                
-                // Рендерим с принудительным видом, ждём пока Bitrix закончит
-                setTimeout(() => injectActivities(null, viewName), 600);
-            });
-            
-            // Смена диапазона дат
-            BX.addCustomEvent('changeviewrange', function(newDate) {
-                console.log('[CalendarActivities] changeviewrange:', newDate);
-                
-                pendingDate = newDate;
-                
-                if (changeViewRangeTimer) {
-                    clearTimeout(changeViewRangeTimer);
-                }
-                
-                changeViewRangeTimer = setTimeout(() => {
-                    if (!viewChangeInProgress && pendingDate) {
-                        console.log('[CalendarActivities] Processing changeviewrange');
-                        // Передаём текущий вид если известен
-                        injectActivities(pendingDate, currentViewName);
-                    }
-                    changeViewRangeTimer = null;
-                    pendingDate = null;
-                }, 200);
-            });
-            
-            // После AJAX загрузки событий Bitrix - перерисовываем наши
-            BX.addCustomEvent('onajaxsuccessfinish', function() {
-                // Debounce - ждём пока все AJAX завершатся
-                clearTimeout(window._calendarAjaxTimer);
-                window._calendarAjaxTimer = setTimeout(() => {
-                    // Проверяем что наши элементы пропали
-                    if (document.querySelectorAll('.calendar-activity-item').length === 0) {
-                        console.log('[CalendarActivities] Re-inject after AJAX');
-                        injectActivities(null, currentViewName);
-                    }
-                }, 300);
-            });
-            
-            console.log('[CalendarActivities] BX events subscribed');
+        if (typeof BX === 'undefined') {
+            log('BX not found, waiting...');
+            setTimeout(init, 500);
+            return;
         }
 
-        // Первичная загрузка
-        setTimeout(() => {
-            if (document.querySelectorAll('.calendar-activity-item').length === 0) {
-                // Определяем начальный вид
-                currentViewName = getCalendarView();
-                console.log('[CalendarActivities] Initial load, view:', currentViewName);
-                injectActivities(null, currentViewName);
-            }
-        }, 10000);
+        // Ждём появления календаря
+        const cal = getCalendar();
+        if (!cal) {
+            log('Calendar not found, subscribing to event...');
+            
+            BX.addCustomEvent('oncalendarafterbuildviews', function(calendar) {
+                log('Calendar found via event');
+                state.calendar = calendar;
+                setupEventHandlers();
+                update();
+            });
+            return;
+        }
 
-        console.log('[CalendarActivities] Initialized');
+        setupEventHandlers();
+        
+        // Первичная загрузка с небольшой задержкой
+        setTimeout(update, 500);
+
+        state.initialized = true;
+        log('Initialized');
     }
 
+    function setupEventHandlers() {
+        if (typeof BX === 'undefined') return;
+
+        // Смена диапазона дат
+        BX.addCustomEvent('changeviewrange', function(newDate) {
+            log('changeviewrange:', newDate);
+            // Сбрасываем кэш диапазона
+            state.currentDateFrom = null;
+            state.currentDateTo = null;
+            // Обновляем с задержкой чтобы календарь успел обновиться
+            setTimeout(update, 300);
+        });
+
+        // Смена вида (день/неделя/месяц)
+        BX.addCustomEvent('aftersetview', function(params) {
+            log('aftersetview:', params);
+            state.currentDateFrom = null;
+            state.currentDateTo = null;
+            setTimeout(update, 300);
+        });
+
+        // После AJAX загрузки событий Bitrix
+        BX.addCustomEvent('BX.Calendar:onEntryListReload', function() {
+            log('onEntryListReload - refreshing');
+            setTimeout(update, 200);
+        });
+
+        // ==========================================
+        // ПЕРЕХВАТ КЛИКА НА CRM АКТИВНОСТИ
+        // ==========================================
+
+        // Способ 1: Перехватываем событие viewonclick
+        BX.addCustomEvent('viewonclick', function(params) {
+            if (!params || !params[0]) return;
+            
+            const eventData = params[0];
+            const target = eventData.target || eventData.e?.target;
+            
+            if (!target) return;
+
+            // Проверяем, является ли это CRM активностью
+            const entry = findEntryByElement(target);
+            if (entry?.data?._isCrmActivity) {
+                log('viewonclick: CRM activity detected, intercepting');
+                handleCrmActivityClick(entry, eventData.e);
+            }
+        });
+
+        // Способ 2: Перехват на уровне Entry
+        BX.addCustomEvent('BX.Calendar:onEntryClick', function(params) {
+            if (!params) return;
+            
+            const entry = params.entry || params;
+            if (entry?.data?._isCrmActivity) {
+                log('onEntryClick: CRM activity detected');
+                handleCrmActivityClick(entry, params.event);
+            }
+        });
+
+        // Способ 3: Переопределяем handleEntryClick на каждом view
+        const cal = getCalendar();
+        if (cal?.views) {
+            cal.views.forEach(view => {
+                if (view.handleEntryClick) {
+                    const originalHandleEntryClick = view.handleEntryClick.bind(view);
+                    view.handleEntryClick = function(params) {
+                        const entry = params?.entry;
+                        if (entry?.data?._isCrmActivity) {
+                            log('handleEntryClick intercepted for CRM activity');
+                            handleCrmActivityClick(entry, params?.event);
+                            return; // Не вызываем оригинальный обработчик
+                        }
+                        return originalHandleEntryClick(params);
+                    };
+                }
+                
+                // Также переопределяем showCompactViewForm
+                if (view.showCompactViewForm) {
+                    const originalShowCompactViewForm = view.showCompactViewForm.bind(view);
+                    view.showCompactViewForm = function(params) {
+                        const entry = params?.entry;
+                        if (entry?.data?._isCrmActivity) {
+                            log('showCompactViewForm intercepted for CRM activity');
+                            handleCrmActivityClick(entry, null);
+                            return;
+                        }
+                        return originalShowCompactViewForm(params);
+                    };
+                }
+            });
+            log('View handlers patched');
+        }
+
+        // Способ 4: Делегирование событий на контейнере календаря (наиболее надёжный)
+        const cal2 = getCalendar();
+        if (cal2?.mainCont) {
+            cal2.mainCont.addEventListener('click', function(e) {
+                const target = e.target;
+                
+                // Проверяем клик по элементу события
+                const eventElement = target.closest('.calendar-event-block-wrap, .calendar-grid-month-event-slot, [data-bx-calendar-entry]');
+                if (!eventElement) return;
+
+                const entry = findEntryByElement(eventElement);
+                if (entry?.data?._isCrmActivity) {
+                    log('DOM click intercepted for CRM activity');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    handleCrmActivityClick(entry, e);
+                }
+            }, true); // Используем capture phase для перехвата до обработчиков календаря
+            
+            log('DOM click handler attached');
+        }
+
+        log('Event handlers set up');
+    }
+
+    // ===================
     // Запуск
+    // ===================
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {
-        init();
+        // Даём время на инициализацию календаря
+        setTimeout(init, 1000);
     }
 
-    // Экспорт
-    window.CalendarActivities = {
-        refresh: injectActivities,
-        getRange: getVisibleDateRange,
-        getView: getCalendarView
-    };
-    
+    // ===================
+    // Экспорт API
+    // ===================
 
+    window.CRMCalendar = {
+        update: update,
+        refresh: refreshView,
+        getState: () => ({ ...state }),
+        
+        // Ручное добавление активности для тестирования
+        addTest: function() {
+            const now = new Date();
+            const testActivity = {
+                id: 'test_' + Date.now(),
+                title: '🟠 Test CRM Activity',
+                type: 'Дело',
+                dateFrom: now.toLocaleDateString('ru-RU').replace(/\//g, '.'),
+                dateTo: now.toLocaleDateString('ru-RU').replace(/\//g, '.'),
+                timeFrom: now.toTimeString().slice(0, 5),
+                timeTo: new Date(now.getTime() + 3600000).toTimeString().slice(0, 5),
+                ownerType: 'deal',
+                ownerId: 1
+            };
+            
+            const cal = getCalendar();
+            if (cal) {
+                const rawEntry = activityToRawEntry(testActivity, cal);
+                cal.entryController?.appendToEntriesRaw?.([rawEntry]);
+                refreshView();
+                log('Test activity added');
+                return testActivity;
+            }
+            return null;
+        },
+        
+        // Очистка CRM активностей
+        clear: function() {
+            const cal = getCalendar();
+            if (cal?.entryController?.entriesRaw) {
+                cal.entryController.entriesRaw = cal.entryController.entriesRaw.filter(
+                    e => !String(e.ID).startsWith(CONFIG.entryPrefix)
+                );
+                refreshView();
+                log('CRM activities cleared');
+            }
+        },
+        
+        // Открыть активность по ID
+        openActivity: function(activityId) {
+            return openActivitySlider(activityId);
+        },
+        
+        // Тест клика
+        testClick: function() {
+            const cal = getCalendar();
+            const view = cal?.getView();
+            if (view?.entries) {
+                const crmEntry = view.entries.find(e => e.data?._isCrmActivity);
+                if (crmEntry) {
+                    log('Found CRM entry:', crmEntry);
+                    handleCrmActivityClick(crmEntry, null);
+                    return crmEntry;
+                }
+                log('No CRM entries found');
+            }
+            return null;
+        }
+    };
+
+    log('Script loaded');
 
 })();
