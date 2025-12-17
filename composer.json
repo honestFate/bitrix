@@ -1,0 +1,23 @@
+{
+    "name": "tranzit-oil/bitrix-local",
+    "description": "Custom functions for Bitrix",
+    "type": "project",
+    "require": {
+        "php": ">=8.1",
+        "brick/money": "^0.10.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Local\\": "classes/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Vyacheslav",
+            "email": "Shop3@tranzit-oil.com"
+        }
+    ],
+    "config": {
+        "optimize-autoloader": true
+    }
+}
