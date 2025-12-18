@@ -68,6 +68,21 @@ $companyId = intval($arResult['COMPANY_ID']);
                                         <?php endif; ?>
                                     </span>
                                 </div>
+
+                                <div class="crm-contract-row">
+                                    <div class="crm-contract-field">
+                                        <span class="crm-contract-label">Задолженность</span>
+                                        <span class="crm-contract-value crm-contract-debt crm-contract-debt-<?= $item['UF_DEBT_TYPE'] ?>">
+                                            <?php if ($item['UF_DEBT_TYPE'] === 'debit'): ?>
+                                                <?= $item['UF_DEBT_FORMATTED'] ?>
+                                            <?php elseif ($item['UF_DEBT_TYPE'] === 'credit'): ?>
+                                                −<?= $item['UF_DEBT_FORMATTED'] ?>
+                                            <?php else: ?>
+                                                0 ₽
+                                            <?php endif; ?>
+                                        </span>
+                                    </div>
+                                </div>
                                 
                                 <?php if ($item['UF_CONTRACT_FILE']): ?>
                                     <div class="crm-contract-field">

@@ -3,7 +3,14 @@
 
 if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) die();
 
+$composerAutoload = $_SERVER['DOCUMENT_ROOT'] . '/local/vendor/autoload.php';
+if (file_exists($composerAutoload)) {
+    require_once $composerAutoload;
+}
+
 use Bitrix\Main\Localization\Loc;
+use Brick\Money\Money;
+use Brick\Money\Context\CustomContext;
 
 Loc::loadMessages(__FILE__);
 
@@ -84,6 +91,14 @@ class CrmCompanyTabContracts extends CrmCompanyTabBase
                 'EDITABLE' => false,
                 'MULTIPLE' => false,
             ],
+            'UF_DEBT' => [
+                'CODE' => 'UF_DEBT',
+                'NAME' => 'Задолженность',
+                'TYPE' => 'money_minor',
+                'REQUIRED' => false,
+                'EDITABLE' => false,
+                'MULTIPLE' => false,
+            ],
         ];
         
         // ТОЛЬКО ПРОСМОТР - без редактирования
@@ -139,6 +154,33 @@ class CrmCompanyTabContracts extends CrmCompanyTabBase
                     'SIZE' => \CFile::FormatSize($fileArray['FILE_SIZE']),
                     'SRC' => $fileArray['SRC'],
                 ];
+            }
+        }
+
+        $deptKopecks = intval($item['UF_DEBT'] ?? 0);
+        $prepared['UF_DEBT'] = $deptKopecks;
+        $prepared['UF_DEBT_FORMATTED'] = '';
+        $prepared['UF_DEBT_TYPE'] = 'zero'; // zero, debit (должны нам), credit (мы должны)
+
+        if ($deptKopecks !== 0) {
+            try {
+                // Конвертируем копейки в рубли (делим на 100)
+                $money = Money::ofMinor($deptKopecks, 'RUB');
+                
+                // Форматируем
+                $amount = $money->getAmount()->toFloat();
+                $absAmount = abs($amount);
+                
+                $prepared['UF_DEBT_FORMATTED'] = number_format($absAmount, 2, ',', ' ') . ' ₽';
+                
+                if ($deptKopecks > 0) {
+                    $prepared['UF_DEBT_TYPE'] = 'debit'; // Дебиторская (нам должны)
+                } else {
+                    $prepared['UF_DEBT_TYPE'] = 'credit'; // Кредиторская (мы должны)
+                }
+            } catch (\Exception $e) {
+                AddMessage2Log("Error formatting debt: " . $e->getMessage(), 'crm_tabs');
+                $prepared['UF_DEBT_FORMATTED'] = number_format(abs($deptKopecks / 100), 2, ',', ' ') . ' ₽';
             }
         }
         

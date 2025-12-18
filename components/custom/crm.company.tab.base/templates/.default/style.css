@@ -856,6 +856,24 @@
     color: #8c8c8c;
 }
 
+/* Задолженность */
+.crm-contract-debt {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.crm-contract-debt-debit {
+    color: #ff4d4f; /* Красный - дебиторская */
+}
+
+.crm-contract-debt-credit {
+    color: #1890ff; /* Синий - кредиторская */
+}
+
+.crm-contract-debt-zero {
+    color: #8c8c8c;
+}
+
 /* Футер */
 .crm-contract-footer {
     padding: 12px 20px;
