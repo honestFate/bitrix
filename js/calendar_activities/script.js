@@ -3,12 +3,11 @@
 
     /**
      * Интеграция CRM активностей в календарь Bitrix24
-     * Использует нативный API календаря через entriesRaw
      */
 
     const CONFIG = {
         ajaxUrl: '/local/ajax/calendar_activities.php',
-        sectionId: '4', // ID секции календаря (можно изменить)
+        sectionId: '4',
         color: '#FF9800',
         textColor: '#FFFFFF',
         entryPrefix: 'crm_activity_',
@@ -21,14 +20,9 @@
         }
     }
 
-    // ===================
-    // Состояние
-    // ===================
-
     const state = {
         calendar: null,
         initialized: false,
-        loadedActivities: new Map(),
         currentDateFrom: null,
         currentDateTo: null
     };
@@ -67,10 +61,17 @@
     }
 
     function parseActivityDate(dateStr, timeStr) {
-        // dateStr: "DD.MM.YYYY", timeStr: "HH:MM"
         const [d, m, y] = dateStr.split('.');
         const [h, min] = (timeStr || '00:00').split(':');
         return new Date(y, m - 1, d, h || 0, min || 0);
+    }
+
+    function isCrmEntry(entry) {
+        if (!entry) return false;
+        if (entry.data?._isCrmActivity) return true;
+        if (String(entry.id).startsWith(CONFIG.entryPrefix)) return true;
+        if (String(entry.uid).startsWith(CONFIG.entryPrefix)) return true;
+        return false;
     }
 
     // ===================
@@ -98,14 +99,13 @@
     }
 
     // ===================
-    // Конвертация активности в формат entriesRaw
+    // Конвертация активности
     // ===================
 
     function activityToRawEntry(activity, cal) {
         const dateFrom = parseActivityDate(activity.dateFrom, activity.timeFrom);
         const dateTo = parseActivityDate(activity.dateTo, activity.timeTo);
         
-        // Если время окончания <= времени начала, добавляем час
         if (dateTo <= dateFrom) {
             dateTo.setTime(dateFrom.getTime() + 3600000);
         }
@@ -114,45 +114,28 @@
         const userId = cal.util?.config?.userId || 1;
 
         return {
-            // Основные идентификаторы
             ID: CONFIG.entryPrefix + activity.id,
             PARENT_ID: CONFIG.entryPrefix + activity.id,
-            
-            // Статус
             ACTIVE: 'Y',
             DELETED: 'N',
-            
-            // Тип и владелец
             CAL_TYPE: 'user',
             OWNER_ID: String(ownerId),
-            
-            // Название и описание
             NAME: activity.title || activity.type || 'CRM Activity',
             DESCRIPTION: activity.description || '',
-            
-            // Даты в формате Bitrix
             DATE_FROM: formatBxDate(dateFrom),
             DATE_TO: formatBxDate(dateTo),
             DATE_FROM_TS_UTC: String(Math.floor(dateFrom.getTime() / 1000)),
             DATE_TO_TS_UTC: String(Math.floor(dateTo.getTime() / 1000)),
             DT_LENGTH: Math.floor((dateTo - dateFrom) / 1000),
-            
-            // Временная зона
             TZ_FROM: 'Europe/Moscow',
             TZ_TO: 'Europe/Moscow',
             TZ_OFFSET_FROM: '10800',
             TZ_OFFSET_TO: '10800',
-            
-            // Тип события
             DT_SKIP_TIME: activity.isAllDay ? 'Y' : 'N',
-            
-            // Секция и цвет
             SECT_ID: CONFIG.sectionId,
             SECTION_ID: CONFIG.sectionId,
             COLOR: CONFIG.color,
             TEXT_COLOR: CONFIG.textColor,
-            
-            // Параметры встречи
             ACCESSIBILITY: 'busy',
             IMPORTANCE: 'normal',
             PRIVATE_EVENT: '',
@@ -160,18 +143,7 @@
             MEETING_STATUS: 'Y',
             RRULE: '',
             ATTENDEES_CODES: [],
-            
-            // Автор
             CREATED_BY: String(userId),
-            
-            // Разрешения
-            permissions: {
-                edit: false,
-                edit_attendees: false,
-                edit_location: false
-            },
-            
-            // Дополнительные данные для обработки клика
             _isCrmActivity: true,
             _activityId: activity.id,
             _ownerType: activity.ownerType,
@@ -180,40 +152,30 @@
     }
 
     // ===================
-    // Добавление активностей в календарь
+    // Инъекция и обновление
     // ===================
 
     function injectActivities(activities) {
         const cal = getCalendar();
-        if (!cal) {
-            log('Calendar not found');
-            return;
-        }
+        if (!cal) return;
 
         const view = cal.getView();
-        if (!view) {
-            log('View not found');
-            return;
-        }
+        if (!view) return;
 
-        log('Injecting', activities.length, 'activities into', view.name, 'view');
+        log('Injecting', activities.length, 'activities');
 
-        // Удаляем старые CRM активности из entriesRaw
         if (cal.entryController?.entriesRaw) {
             cal.entryController.entriesRaw = cal.entryController.entriesRaw.filter(
                 e => !String(e.ID).startsWith(CONFIG.entryPrefix)
             );
         }
 
-        // Конвертируем и добавляем новые
         const rawEntries = activities.map(a => activityToRawEntry(a, cal));
         
         if (rawEntries.length > 0 && cal.entryController?.appendToEntriesRaw) {
             cal.entryController.appendToEntriesRaw(rawEntries);
-            log('Added', rawEntries.length, 'entries to entriesRaw');
         }
 
-        // Пересоздаём entries и перерисовываем
         refreshView();
     }
 
@@ -225,7 +187,6 @@
         if (!view) return;
 
         try {
-            // Пересоздаём Entry объекты из сырых данных
             if (cal.entryController?.getEntriesFromEntriesRaw) {
                 const entries = cal.entryController.getEntriesFromEntriesRaw();
                 if (entries) {
@@ -234,7 +195,6 @@
                 }
             }
 
-            // Перерисовываем
             if (view.redraw) {
                 view.redraw();
                 log('View redrawn');
@@ -245,7 +205,7 @@
     }
 
     // ===================
-    // Получение диапазона дат
+    // Диапазон дат
     // ===================
 
     function getDateRange() {
@@ -267,83 +227,34 @@
             dateTo = new Date(dateFrom);
             dateTo.setDate(dateFrom.getDate() + 6);
         } else {
-            // month или list
             dateFrom = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
             dateTo = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0);
         }
 
-        return {
-            dateFrom: formatDate(dateFrom),
-            dateTo: formatDate(dateTo),
-            view: viewName
-        };
+        return { dateFrom: formatDate(dateFrom), dateTo: formatDate(dateTo), view: viewName };
     }
-
-    // ===================
-    // Главная функция обновления
-    // ===================
 
     function update() {
         const range = getDateRange();
-        if (!range) {
-            log('Could not get date range');
-            return;
-        }
+        if (!range) return;
 
-        // Проверяем не загружали ли уже этот диапазон
-        const rangeKey = `${range.dateFrom}_${range.dateTo}`;
         if (state.currentDateFrom === range.dateFrom && state.currentDateTo === range.dateTo) {
-            log('Range already loaded, refreshing view only');
             refreshView();
             return;
         }
 
         state.currentDateFrom = range.dateFrom;
         state.currentDateTo = range.dateTo;
-
         log('Updating for range:', range);
 
-        loadActivities(range.dateFrom, range.dateTo)
-            .then(activities => {
-                if (activities && activities.length > 0) {
-                    injectActivities(activities);
-                } else {
-                    // Удаляем старые если нет новых
-                    injectActivities([]);
-                }
-            });
+        loadActivities(range.dateFrom, range.dateTo).then(activities => {
+            injectActivities(activities || []);
+        });
     }
 
     // ===================
-    // Обработка клика на активность
+    // Клик
     // ===================
-
-    function openActivitySlider(activityId) {
-        // Открываем слайдер просмотра/редактирования активности CRM
-        const url = `/crm/activity/?act=view&id=${activityId}`;
-        
-        if (typeof BX !== 'undefined' && BX.CrmActivityEditor) {
-            // Используем нативный редактор активностей CRM
-            BX.CrmActivityEditor.viewActivity(activityId);
-            return true;
-        }
-        
-        if (typeof BX !== 'undefined' && BX.Crm?.Activity?.TodoEditor) {
-            // Bitrix24 новый редактор дел
-            BX.Crm.Activity.TodoEditor.open({ activityId: activityId });
-            return true;
-        }
-
-        if (typeof BX !== 'undefined' && BX.SidePanel?.Instance) {
-            // Fallback - открываем в слайдере
-            BX.SidePanel.Instance.open(url, { width: 700 });
-            return true;
-        }
-        
-        // Последний fallback
-        window.open(url, '_blank');
-        return true;
-    }
 
     function openOwnerCard(ownerType, ownerId) {
         const urls = {
@@ -354,7 +265,7 @@
         };
         const url = urls[ownerType] || urls.deal;
 
-        if (typeof BX !== 'undefined' && BX.SidePanel?.Instance) {
+        if (BX?.SidePanel?.Instance) {
             BX.SidePanel.Instance.open(url, { width: 1000 });
         } else {
             window.open(url, '_blank');
@@ -362,73 +273,130 @@
     }
 
     function handleCrmActivityClick(entry, event) {
-        if (!entry?.data?._isCrmActivity) {
-            return false;
-        }
-
-        const data = entry.data;
-        log('CRM activity clicked:', data._activityId, data);
-
-        // Предотвращаем стандартное поведение календаря
+        if (!isCrmEntry(entry)) return false;
+        log('CRM activity clicked:', entry.data?._activityId);
         if (event) {
             event.preventDefault();
             event.stopPropagation();
-            event.stopImmediatePropagation();
         }
-
-        // Открываем активность
-        openOwnerCard(data._ownerType, data._ownerId);
-
+        openOwnerCard(entry.data._ownerType, entry.data._ownerId);
         return true;
     }
 
     function findEntryByElement(element) {
         const cal = getCalendar();
-        if (!cal) return null;
-
-        const view = cal.getView();
+        const view = cal?.getView();
         if (!view?.entries) return null;
 
-        // Ищем ID события в атрибутах или родителях
-        let entryWrap = element.closest('[data-bx-calendar-entry]');
-        if (!entryWrap) {
-            entryWrap = element.closest('.calendar-event-block-wrap');
-        }
-        if (!entryWrap) {
-            entryWrap = element.closest('.calendar-grid-month-event-slot');
-        }
-
+        const entryWrap = element.closest('[data-bx-calendar-entry], .calendar-event-block-wrap, .calendar-grid-month-event-slot');
         if (!entryWrap) return null;
 
-        // Пробуем получить ID из атрибута
-        let entryId = entryWrap.getAttribute('data-bx-calendar-entry');
-        
-        // Или из data-entry-id
-        if (!entryId) {
-            entryId = entryWrap.dataset.entryId;
-        }
+        const entryId = entryWrap.getAttribute('data-bx-calendar-entry') || entryWrap.dataset.entryId;
 
-        // Ищем по ID в entries
         if (entryId) {
-            const entry = view.entries.find(e => 
-                String(e.id) === String(entryId) || 
-                e.uid === entryId
-            );
+            const entry = view.entries.find(e => String(e.id) === String(entryId) || e.uid === entryId);
             if (entry) return entry;
         }
 
-        // Fallback: ищем по уникальным данным в элементе
-        // Проверяем текст названия
         const titleEl = entryWrap.querySelector('.calendar-event-block-title, .calendar-item-content-name');
         if (titleEl) {
             const title = titleEl.textContent.trim();
-            const entry = view.entries.find(e => 
-                e.name === title && e.data?._isCrmActivity
-            );
-            if (entry) return entry;
+            return view.entries.find(e => e.name === title && isCrmEntry(e));
         }
 
         return null;
+    }
+
+    // ===================
+    // Блокировка Drag & Drop
+    // ===================
+
+    function patchDragAndDrop() {
+        const cal = getCalendar();
+        if (!cal) return;
+
+        // Патчим eventDragAndDrop
+        const edd = cal.dragDrop?.eventDragAndDrop;
+        if (edd) {
+            // Ищем все методы и патчим те, что связаны с началом drag
+            const proto = Object.getPrototypeOf(edd);
+            const methods = Object.getOwnPropertyNames(proto);
+            
+            log('eventDragAndDrop methods:', methods);
+            
+            // Патчим методы которые могут начинать drag
+            ['onMouseDown', 'start', 'begin', 'init', 'startDrag'].forEach(name => {
+                if (typeof edd[name] === 'function') {
+                    const original = edd[name].bind(edd);
+                    edd[name] = function(params) {
+                        // Проверяем entry в параметрах или в this
+                        const entry = params?.entry || this.entry || this.currentEntry;
+                        if (isCrmEntry(entry)) {
+                            log(`eventDragAndDrop.${name} blocked`);
+                            return false;
+                        }
+                        return original(params);
+                    };
+                    log(`Patched eventDragAndDrop.${name}`);
+                }
+            });
+        }
+
+        // Патчим resizeDragAndDrop аналогично
+        const rdd = cal.dragDrop?.resizeDragAndDrop;
+        if (rdd) {
+            ['onMouseDown', 'start', 'begin', 'init'].forEach(name => {
+                if (typeof rdd[name] === 'function') {
+                    const original = rdd[name].bind(rdd);
+                    rdd[name] = function(params) {
+                        const entry = params?.entry || this.entry || this.currentEntry;
+                        if (isCrmEntry(entry)) {
+                            log(`resizeDragAndDrop.${name} blocked`);
+                            return false;
+                        }
+                        return original(params);
+                    };
+                    log(`Patched resizeDragAndDrop.${name}`);
+                }
+            });
+        }
+
+        log('Drag & Drop patching complete');
+    }
+
+    // Блокировка через DOM (резервный способ)
+    function setupDomDragBlock() {
+        const cal = getCalendar();
+        if (!cal?.mainCont) return;
+
+        let blockingEntry = null;
+
+        cal.mainCont.addEventListener('mousedown', function(e) {
+            const entry = findEntryByElement(e.target);
+            if (isCrmEntry(entry)) {
+                blockingEntry = entry;
+                log('mousedown on CRM entry, blocking drag');
+            }
+        }, true);
+
+        document.addEventListener('mousemove', function(e) {
+            if (blockingEntry) {
+                // Блокируем только если мышь двигается с зажатой кнопкой
+                if (e.buttons === 1) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                }
+            }
+        }, true);
+
+        document.addEventListener('mouseup', function() {
+            if (blockingEntry) {
+                log('mouseup, drag block released');
+                blockingEntry = null;
+            }
+        }, true);
+
+        log('DOM drag block setup complete');
     }
 
     // ===================
@@ -439,233 +407,88 @@
         log('Initializing...');
 
         if (typeof BX === 'undefined') {
-            log('BX not found, waiting...');
             setTimeout(init, 500);
             return;
         }
 
-        // Ждём появления календаря
         const cal = getCalendar();
         if (!cal) {
-            log('Calendar not found, subscribing to event...');
-            
             BX.addCustomEvent('oncalendarafterbuildviews', function(calendar) {
                 log('Calendar found via event');
                 state.calendar = calendar;
+                patchDragAndDrop();
+                setupDomDragBlock();
                 setupEventHandlers();
                 update();
             });
             return;
         }
 
+        patchDragAndDrop();
+        setupDomDragBlock();
         setupEventHandlers();
-        
-        // Первичная загрузка с небольшой задержкой
         setTimeout(update, 500);
-
         state.initialized = true;
         log('Initialized');
     }
 
     function setupEventHandlers() {
-        if (typeof BX === 'undefined') return;
-
-        // Смена диапазона дат
-        BX.addCustomEvent('changeviewrange', function(newDate) {
-            log('changeviewrange:', newDate);
-            // Сбрасываем кэш диапазона
-            state.currentDateFrom = null;
-            state.currentDateTo = null;
-            // Обновляем с задержкой чтобы календарь успел обновиться
-            setTimeout(update, 300);
-        });
-
-        // Смена вида (день/неделя/месяц)
-        BX.addCustomEvent('aftersetview', function(params) {
-            log('aftersetview:', params);
+        BX.addCustomEvent('changeviewrange', function() {
             state.currentDateFrom = null;
             state.currentDateTo = null;
             setTimeout(update, 300);
         });
 
-        // После AJAX загрузки событий Bitrix
+        BX.addCustomEvent('aftersetview', function() {
+            state.currentDateFrom = null;
+            state.currentDateTo = null;
+            setTimeout(update, 300);
+        });
+
         BX.addCustomEvent('BX.Calendar:onEntryListReload', function() {
-            log('onEntryListReload - refreshing');
             setTimeout(update, 200);
         });
 
-        // ==========================================
-        // ПЕРЕХВАТ КЛИКА НА CRM АКТИВНОСТИ
-        // ==========================================
-
-        // Способ 1: Перехватываем событие viewonclick
-        BX.addCustomEvent('viewonclick', function(params) {
-            if (!params || !params[0]) return;
-            
-            const eventData = params[0];
-            const target = eventData.target || eventData.e?.target;
-            
-            if (!target) return;
-
-            // Проверяем, является ли это CRM активностью
-            const entry = findEntryByElement(target);
-            if (entry?.data?._isCrmActivity) {
-                log('viewonclick: CRM activity detected, intercepting');
-                handleCrmActivityClick(entry, eventData.e);
-            }
-        });
-
-        // Способ 2: Перехват на уровне Entry
-        BX.addCustomEvent('BX.Calendar:onEntryClick', function(params) {
-            if (!params) return;
-            
-            const entry = params.entry || params;
-            if (entry?.data?._isCrmActivity) {
-                log('onEntryClick: CRM activity detected');
-                handleCrmActivityClick(entry, params.event);
-            }
-        });
-
-        // Способ 3: Переопределяем handleEntryClick на каждом view
         const cal = getCalendar();
+        
+        // Клик на CRM активности
         if (cal?.views) {
             cal.views.forEach(view => {
-                if (view.handleEntryClick) {
-                    const originalHandleEntryClick = view.handleEntryClick.bind(view);
-                    view.handleEntryClick = function(params) {
-                        const entry = params?.entry;
-                        if (entry?.data?._isCrmActivity) {
-                            log('handleEntryClick intercepted for CRM activity');
-                            handleCrmActivityClick(entry, params?.event);
-                            return; // Не вызываем оригинальный обработчик
-                        }
-                        return originalHandleEntryClick(params);
-                    };
-                }
-                
-                // Также переопределяем showCompactViewForm
                 if (view.showCompactViewForm) {
-                    const originalShowCompactViewForm = view.showCompactViewForm.bind(view);
+                    const original = view.showCompactViewForm.bind(view);
                     view.showCompactViewForm = function(params) {
-                        const entry = params?.entry;
-                        if (entry?.data?._isCrmActivity) {
-                            log('showCompactViewForm intercepted for CRM activity');
-                            handleCrmActivityClick(entry, null);
+                        if (isCrmEntry(params?.entry)) {
+                            handleCrmActivityClick(params.entry, null);
                             return;
                         }
-                        return originalShowCompactViewForm(params);
+                        return original(params);
                     };
                 }
             });
-            log('View handlers patched');
         }
 
-        // Способ 4: Делегирование событий на контейнере календаря (наиболее надёжный)
-        const cal2 = getCalendar();
-        if (cal2?.mainCont) {
-            cal2.mainCont.addEventListener('click', function(e) {
-                const target = e.target;
-                
-                // Проверяем клик по элементу события
-                const eventElement = target.closest('.calendar-event-block-wrap, .calendar-grid-month-event-slot, [data-bx-calendar-entry]');
-                if (!eventElement) return;
-
-                const entry = findEntryByElement(eventElement);
-                if (entry?.data?._isCrmActivity) {
-                    log('DOM click intercepted for CRM activity');
+        if (cal?.mainCont) {
+            cal.mainCont.addEventListener('click', function(e) {
+                const entry = findEntryByElement(e.target);
+                if (isCrmEntry(entry)) {
                     e.preventDefault();
                     e.stopPropagation();
-                    e.stopImmediatePropagation();
                     handleCrmActivityClick(entry, e);
                 }
-            }, true); // Используем capture phase для перехвата до обработчиков календаря
-            
-            log('DOM click handler attached');
+            }, true);
         }
 
         log('Event handlers set up');
     }
 
-    // ===================
     // Запуск
-    // ===================
-
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {
-        // Даём время на инициализацию календаря
         setTimeout(init, 1000);
     }
 
-    // ===================
-    // Экспорт API
-    // ===================
-
-    window.CRMCalendar = {
-        update: update,
-        refresh: refreshView,
-        getState: () => ({ ...state }),
-        
-        // Ручное добавление активности для тестирования
-        addTest: function() {
-            const now = new Date();
-            const testActivity = {
-                id: 'test_' + Date.now(),
-                title: '🟠 Test CRM Activity',
-                type: 'Дело',
-                dateFrom: now.toLocaleDateString('ru-RU').replace(/\//g, '.'),
-                dateTo: now.toLocaleDateString('ru-RU').replace(/\//g, '.'),
-                timeFrom: now.toTimeString().slice(0, 5),
-                timeTo: new Date(now.getTime() + 3600000).toTimeString().slice(0, 5),
-                ownerType: 'deal',
-                ownerId: 1
-            };
-            
-            const cal = getCalendar();
-            if (cal) {
-                const rawEntry = activityToRawEntry(testActivity, cal);
-                cal.entryController?.appendToEntriesRaw?.([rawEntry]);
-                refreshView();
-                log('Test activity added');
-                return testActivity;
-            }
-            return null;
-        },
-        
-        // Очистка CRM активностей
-        clear: function() {
-            const cal = getCalendar();
-            if (cal?.entryController?.entriesRaw) {
-                cal.entryController.entriesRaw = cal.entryController.entriesRaw.filter(
-                    e => !String(e.ID).startsWith(CONFIG.entryPrefix)
-                );
-                refreshView();
-                log('CRM activities cleared');
-            }
-        },
-        
-        // Открыть активность по ID
-        openActivity: function(activityId) {
-            return openActivitySlider(activityId);
-        },
-        
-        // Тест клика
-        testClick: function() {
-            const cal = getCalendar();
-            const view = cal?.getView();
-            if (view?.entries) {
-                const crmEntry = view.entries.find(e => e.data?._isCrmActivity);
-                if (crmEntry) {
-                    log('Found CRM entry:', crmEntry);
-                    handleCrmActivityClick(crmEntry, null);
-                    return crmEntry;
-                }
-                log('No CRM entries found');
-            }
-            return null;
-        }
-    };
-
+    window.CRMCalendar = { update, refresh: refreshView, getState: () => ({ ...state }) };
     log('Script loaded');
 
 })();

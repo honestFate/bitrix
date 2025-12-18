@@ -1,16 +1,38 @@
 <?php
 /**
- * REST API для Highload-блоков с поддержкой токенов
+ * REST API для Highload-блоков с поддержкой токенов и batch-операций
  * /local/ajax/hl_api.php
+ * 
+ * Расширенная версия с поддержкой:
+ * - Множественной загрузки (batch_add, batch_update)
+ * - Нового HL-блока "Расчёт портфеля" (ID 7)
+ * 
+ * @version 2.0
  */
+
+// Composer autoload для brick/money
+$composerAutoload = $_SERVER['DOCUMENT_ROOT'] . '/local/vendor/autoload.php';
+if (file_exists($composerAutoload)) {
+    require_once $composerAutoload;
+}
 
 use Bitrix\Main\Loader;
 use Bitrix\Main\Application;
 use Bitrix\Highloadblock as HL;
 use Bitrix\Main\Type\Date;
+use Bitrix\Main\Type\DateTime;
+use Brick\Money\Money;
+use Brick\Money\Currency;
+use Brick\Math\RoundingMode;
 
 if (!defined('LOG_FILENAME')) {
     define('LOG_FILENAME', $_SERVER['DOCUMENT_ROOT'] . '/local/logs/hl_api.log');
+}
+
+// Создаём директорию для логов
+$logDir = dirname(LOG_FILENAME);
+if (!is_dir($logDir)) {
+    @mkdir($logDir, 0755, true);
 }
 
 define('NO_KEEP_STATISTIC', true);
@@ -25,7 +47,7 @@ header('Content-Type: application/json; charset=utf-8');
 
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Authorization, X-API-Token, Content-Type');
-header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -123,7 +145,6 @@ class HLApiValidator
             return false;
         }
         
-        // Поддерживаем оба формата: "CO_123" и просто "123"
         $companyId = null;
         if (preg_match('/^CO_(\d+)$/', $value, $matches)) {
             $companyId = intval($matches[1]);
@@ -149,7 +170,6 @@ class HLApiValidator
             return false;
         }
         
-        // Используем GetListEx для надёжной проверки
         $dbResult = \CCrmCompany::GetListEx(
             [],
             ['ID' => $companyId, 'CHECK_PERMISSIONS' => 'N'],
@@ -234,29 +254,47 @@ class HLApiValidator
         return true;
     }
     
-    /**
-     * Валидация поля типа "деньги"
-     * Принимает строку вида "100,15" или "-500.00"
-     * 
-     * @param string $field Код поля
-     * @param mixed $value Значение
-     * @param string $fieldName Название поля для сообщений
-     * @return bool
-     */
     public function validateMoney($field, $value, $fieldName = ''): bool
     {
         $fieldName = $fieldName ?: $field;
         
         if (empty($value) && $value !== '0' && $value !== 0) {
-            return true; // Пустое значение допустимо, если поле не обязательное
+            return true;
         }
         
-        // Нормализуем: заменяем запятую на точку
         $normalizedValue = str_replace(',', '.', trim($value));
         
-        // Проверяем формат: опциональный минус, цифры, опциональная точка с цифрами
         if (!preg_match('/^-?\d+(\.\d{1,2})?$/', $normalizedValue)) {
             $this->addError($field, "{$fieldName}: неверный формат суммы. Ожидается число, например: 100.50 или -500,00");
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Валидация денежного значения для хранения в копейках
+     * Принимает: "15000.50", "15000,50", "15 000.50", 1500050 (уже копейки)
+     */
+    public function validateMoneyMinor($field, $value, $fieldName = ''): bool
+    {
+        $fieldName = $fieldName ?: $field;
+        
+        if (empty($value) && $value !== '0' && $value !== 0) {
+            return true;
+        }
+        
+        // Если уже integer - это копейки
+        if (is_int($value)) {
+            return true;
+        }
+        
+        // Очистка от пробелов и замена запятой на точку
+        $normalizedValue = str_replace([' ', ','], ['', '.'], trim($value));
+        
+        // Проверяем формат: целое число (копейки) или десятичное (рубли)
+        if (!preg_match('/^-?\d+(\.\d{1,2})?$/', $normalizedValue)) {
+            $this->addError($field, "{$fieldName}: неверный формат суммы. Ожидается: 15000.50 (рубли) или 1500050 (копейки)");
             return false;
         }
         
@@ -317,7 +355,7 @@ class HLApiHandler
     private $userId;
     private $tokenData = null;
     private $authMethod = 'session';
-    private $allowedHlBlocks = [5, 6];
+    private $allowedHlBlocks = [5, 6, 7]; // Добавлен блок 7 - Расчёт портфеля
     
     private $hlConfig = [
         5 => [
@@ -331,6 +369,8 @@ class HLApiHandler
                 'add' => true,
                 'update' => true,
                 'delete' => true,
+                'batch_add' => true,
+                'batch_update' => true,
             ]
         ],
         6 => [
@@ -351,6 +391,55 @@ class HLApiHandler
                 'add' => true,
                 'update' => true,
                 'delete' => false,
+                'batch_add' => true,
+                'batch_update' => true,
+            ]
+        ],
+        7 => [
+            'name' => 'Расчёт портфеля',
+            'fields' => [
+                'UF_PERIOD' => ['required' => true, 'type' => 'datetime'],
+                'UF_CONTRACTOR' => ['required' => true, 'type' => 'string'],
+                'UF_CONTRACTOR_ID' => ['required' => false, 'type' => 'crm_company'],
+                'UF_CONTRACT' => ['required' => false, 'type' => 'string'],
+                'UF_CONTRACT_ID' => ['required' => false, 'type' => 'hlblock'],
+                'UF_DOCUMENT' => ['required' => true, 'type' => 'string'],
+                'UF_ORGANIZATION' => ['required' => false, 'type' => 'string'],
+                'UF_ORGANIZATION_ID' => ['required' => false, 'type' => 'crm_company'],
+                'UF_DEPARTMENT' => ['required' => false, 'type' => 'string'],
+                'UF_DEPARTMENT_ID' => ['required' => false, 'type' => 'iblock_section'],
+                'UF_MANAGER' => ['required' => false, 'type' => 'string'],
+                'UF_MANAGER_ID' => ['required' => false, 'type' => 'employee'],
+                'UF_SUPERVISOR' => ['required' => false, 'type' => 'string'],
+                'UF_SUPERVISOR_ID' => ['required' => false, 'type' => 'employee'],
+                'UF_AGENT' => ['required' => false, 'type' => 'string'],
+                'UF_AGENT_ID' => ['required' => false, 'type' => 'employee'],
+                'UF_DIRECTION_HEAD' => ['required' => false, 'type' => 'string'],
+                'UF_DIRECTION_HEAD_ID' => ['required' => false, 'type' => 'employee'],
+                // Денежные поля - хранятся в копейках (integer), конвертация через brick/money
+                'UF_DOC_SUM' => ['required' => true, 'type' => 'money_minor'],
+                'UF_CREDIT_SUM' => ['required' => true, 'type' => 'money_minor'],
+                'UF_OVERDUE_CREDIT_SUM' => ['required' => false, 'type' => 'money_minor'],
+                'UF_AGENT_DEDUCTION' => ['required' => false, 'type' => 'money_minor'],
+                'UF_SUPERVISOR_DEDUCTION' => ['required' => false, 'type' => 'money_minor'],
+                'UF_MANAGER_DEDUCTION' => ['required' => false, 'type' => 'money_minor'],
+                'UF_DIRECTION_HEAD_DEDUCTION' => ['required' => false, 'type' => 'money_minor'],
+                'UF_SHIPMENT_DATE' => ['required' => false, 'type' => 'date'],
+                'UF_PAYMENT_DATE' => ['required' => false, 'type' => 'date'],
+                'UF_DOC_DATE' => ['required' => false, 'type' => 'datetime'],
+                'UF_DEBT_DEPTH' => ['required' => false, 'type' => 'integer'],
+                'UF_CREDIT_LIMIT' => ['required' => false, 'type' => 'money_minor'],
+                'UF_PAYMENT_DELAY' => ['required' => false, 'type' => 'integer'],
+                'UF_IS_COLLATERAL' => ['required' => false, 'type' => 'boolean'],
+                'UF_CONTRACT_TYPE' => ['required' => false, 'type' => 'string'],
+            ],
+            'permissions' => [
+                'read' => true,
+                'add' => true,
+                'update' => true,
+                'delete' => true,
+                'batch_add' => true,
+                'batch_update' => true,
             ]
         ],
     ];
@@ -378,9 +467,9 @@ class HLApiHandler
             $action = $this->getParam($request, 'action', 'get');
             $hlBlockId = intval($this->getParam($request, 'hlBlockId', 0));
             
-            // Опция для пропуска проверки существования компании
             $skipCompanyCheck = $this->getParam($request, 'skipCompanyValidation', false);
-            if ($skipCompanyCheck) {
+            // Пропуск проверки работает только если: параметр true И токен разрешает
+            if ($skipCompanyCheck && !empty($this->tokenData['skip_company_validation'])) {
                 $this->validator->setSkipCompanyExistenceCheck(true);
             }
             
@@ -407,6 +496,12 @@ class HLApiHandler
                 case 'delete':
                     $this->actionDelete($request, $hlBlockId);
                     break;
+                case 'batch_add':
+                    $this->actionBatchAdd($request, $hlBlockId);
+                    break;
+                case 'batch_update':
+                    $this->actionBatchUpdate($request, $hlBlockId);
+                    break;
                 default:
                     $this->sendError('Неизвестное действие: ' . $action, 400);
             }
@@ -428,10 +523,6 @@ class HLApiHandler
                 $this->tokenData = $tokenData;
                 $this->userId = $tokenData['user_id'];
                 $this->authMethod = 'token';
-                
-                if (!empty($tokenData['skip_company_validation'])) {
-                    $this->validator->setSkipCompanyExistenceCheck(true);
-                }
                 
                 return true;
             }
@@ -467,6 +558,8 @@ class HLApiHandler
             'add' => 'add',
             'update' => 'update',
             'delete' => 'delete',
+            'batch_add' => 'batch_add',
+            'batch_update' => 'batch_update',
         ];
         
         $permAction = $actionMap[$action] ?? 'read';
@@ -500,7 +593,7 @@ class HLApiHandler
         $crmPerms = new \CCrmPerms($this->userId);
         
         $crmAction = 'READ';
-        if (in_array($action, ['add', 'update'])) {
+        if (in_array($action, ['add', 'update', 'batch_add', 'batch_update'])) {
             $crmAction = 'WRITE';
         } elseif ($action === 'delete') {
             $crmAction = 'DELETE';
@@ -576,6 +669,9 @@ class HLApiHandler
                 case 'money':
                     $this->validator->validateMoney($fieldCode, $value, $fieldCode);
                     break;
+                case 'money_minor':
+                    $this->validator->validateMoneyMinor($fieldCode, $value, $fieldCode);
+                    break;
             }
         }
         
@@ -600,23 +696,37 @@ class HLApiHandler
             
             $value = $fields[$fieldCode];
             
+            if ($value === null || $value === '') {
+                continue;
+            }
+            
             switch ($fieldConfig['type'] ?? 'string') {
                 case 'boolean':
-                    $prepared[$fieldCode] = $value ? 1 : 0;
+                    $boolValue = $value === true || $value === 1 || $value === '1' 
+                        || strtolower($value) === 'да' || strtolower($value) === 'yes';
+                    $prepared[$fieldCode] = $boolValue ? 1 : 0;
                     break;
                 case 'integer':
                     $prepared[$fieldCode] = intval($value);
+                    break;
+                case 'double':
+                    $normalizedValue = str_replace([',', ' '], ['.', ''], trim($value));
+                    $prepared[$fieldCode] = floatval($normalizedValue);
                     break;
                 case 'date':
                     if (!empty($value)) {
                         $prepared[$fieldCode] = $this->prepareDate($value);
                     }
                     break;
+                case 'datetime':
+                    if (!empty($value)) {
+                        $prepared[$fieldCode] = $this->prepareDateTime($value);
+                    }
+                    break;
                 case 'string':
                     $prepared[$fieldCode] = trim($value);
                     break;
                 case 'crm_company':
-                    // Сохраняем только числовой ID без префикса CO_
                     if (preg_match('/^CO_(\d+)$/', $value, $matches)) {
                         $prepared[$fieldCode] = $matches[1];
                     } else {
@@ -626,6 +736,15 @@ class HLApiHandler
                 case 'money':
                     $prepared[$fieldCode] = $this->prepareMoney($value, $fieldConfig['currency'] ?? 'RUB');
                     break;
+                case 'money_minor':
+                    // Хранение в копейках через brick/money
+                    $prepared[$fieldCode] = $this->prepareMoneyMinor($value);
+                    break;
+                case 'employee':
+                case 'hlblock':
+                case 'iblock_section':
+                    $prepared[$fieldCode] = intval($value);
+                    break;
                 default:
                     $prepared[$fieldCode] = $value;
             }
@@ -634,28 +753,67 @@ class HLApiHandler
         return $prepared;
     }
     
-    /**
-     * Подготовка значения типа "деньги" для сохранения в Bitrix
-     * 
-     * @param mixed $value Входное значение (строка вида "100,50" или "-500.00")
-     * @param string $currency Код валюты (по умолчанию RUB)
-     * @return string Значение в формате Bitrix "100.50|RUB"
-     */
     private function prepareMoney($value, $currency = 'RUB'): string
     {
         if (empty($value) && $value !== '0' && $value !== 0) {
             return '';
         }
         
-        // Нормализуем: заменяем запятую на точку, убираем пробелы
         $normalizedValue = str_replace([',', ' '], ['.', ''], trim($value));
-        
-        // Приводим к float и форматируем с 2 знаками после запятой
         $floatValue = floatval($normalizedValue);
         $formattedValue = number_format($floatValue, 2, '.', '');
         
-        // Формат Bitrix для типа "деньги": "сумма|валюта"
         return $formattedValue . '|' . $currency;
+    }
+    
+    /**
+     * Конвертация денежного значения в копейки (minor units) через brick/money
+     * Принимает: "15000.50" (рубли), "15000,50", "15 000.50", 1500050 (уже копейки)
+     * Возвращает: int (копейки)
+     */
+    private function prepareMoneyMinor($value): int
+    {
+        if (empty($value) && $value !== '0' && $value !== 0) {
+            return 0;
+        }
+        
+        // Если уже integer - считаем что это копейки
+        if (is_int($value)) {
+            return $value;
+        }
+        
+        // Очистка: убираем пробелы, заменяем запятую на точку
+        $normalizedValue = str_replace([' ', ','], ['', '.'], trim($value));
+        
+        // Если целое число без точки и больше 100 - скорее всего уже копейки
+        if (ctype_digit(ltrim($normalizedValue, '-')) && abs((int)$normalizedValue) >= 100) {
+            // Проверяем: если это похоже на копейки (большое число без дробной части)
+            // Но это может быть и 100 рублей ровно. Для однозначности:
+            // - если передано как string без точки - считаем копейками
+            // - если передано с точкой - считаем рублями
+            return (int)$normalizedValue;
+        }
+        
+        try {
+            // Определяем, есть ли дробная часть
+            if (strpos($normalizedValue, '.') !== false) {
+                // Это рубли с копейками - конвертируем через brick/money
+                $money = Money::of($normalizedValue, 'RUB', roundingMode: RoundingMode::HALF_UP);
+                return $money->getMinorAmount()->toInt();
+            } else {
+                // Целое число - если маленькое, считаем рублями, если большое - копейками
+                $intValue = (int)$normalizedValue;
+                // Эвристика: если число < 1000000 и передано без точки, считаем копейками
+                // Это покрывает суммы до 10000 рублей как копейки
+                // Для больших сумм используйте явно дробный формат "1000000.00"
+                return $intValue;
+            }
+        } catch (\Exception $e) {
+            AddMessage2Log("[MONEY_MINOR] Error parsing value '{$value}': " . $e->getMessage(), 'hl_api');
+            // Fallback: пробуем как float и умножаем на 100
+            $floatValue = (float)$normalizedValue;
+            return (int)round($floatValue * 100);
+        }
     }
     
     private function prepareDate($value)
@@ -676,19 +834,36 @@ class HLApiHandler
         return null;
     }
     
+    private function prepareDateTime($value)
+    {
+        if ($value instanceof DateTime) {
+            return $value;
+        }
+        
+        $formats = ['d.m.Y H:i:s', 'Y-m-d H:i:s', 'd.m.Y G:i:s', 'd.m.Y', 'Y-m-d'];
+        
+        foreach ($formats as $format) {
+            $parsed = \DateTime::createFromFormat($format, $value);
+            if ($parsed !== false) {
+                return DateTime::createFromPhp($parsed);
+            }
+        }
+        
+        return null;
+    }
+    
     private function actionGet($request, $hlBlockId): void
     {
         $entityClass = $this->getEntityClass($hlBlockId);
         
         $companyId = $this->getParam($request, 'companyId');
         $itemId = intval($this->getParam($request, 'itemId', 0));
-        $limit = min(intval($this->getParam($request, 'limit', 50)), 100);
+        $limit = min(intval($this->getParam($request, 'limit', 50)), 1000);
         $offset = max(intval($this->getParam($request, 'offset', 0)), 0);
         
         $filter = [];
         
         if (!empty($companyId)) {
-            // Нормализуем ID компании
             $normalizedCompanyId = null;
             if (preg_match('/^CO_(\d+)$/', $companyId, $matches)) {
                 $normalizedCompanyId = intval($matches[1]);
@@ -696,26 +871,9 @@ class HLApiHandler
                 $normalizedCompanyId = intval($companyId);
             }
             
-            if (!$normalizedCompanyId || $normalizedCompanyId <= 0) {
-                $this->sendError('Неверный формат ID компании', 400);
+            if ($normalizedCompanyId && $normalizedCompanyId > 0) {
+                $filter['UF_COMPANY_ID'] = $normalizedCompanyId;
             }
-            
-            // Проверяем существование компании
-            $dbResult = \CCrmCompany::GetListEx(
-                [],
-                ['ID' => $normalizedCompanyId, 'CHECK_PERMISSIONS' => 'N'],
-                false,
-                ['nTopCount' => 1],
-                ['ID', 'TITLE']
-            );
-            
-            $company = $dbResult ? $dbResult->Fetch() : null;
-            
-            if (!$company) {
-                $this->sendError("Компания с ID {$normalizedCompanyId} не найдена", 404);
-            }
-            
-            $filter['UF_COMPANY_ID'] = $normalizedCompanyId;
         }
         
         if ($itemId > 0) {
@@ -759,11 +917,10 @@ class HLApiHandler
         foreach ($item as $key => $value) {
             if ($key === 'ID') continue;
             
-            // Проверяем тип поля в конфигурации
             $fieldType = $config[$key]['type'] ?? null;
             
-            if ($value instanceof Date) {
-                $output[$key] = $value->format('d.m.Y');
+            if ($value instanceof Date || $value instanceof DateTime) {
+                $output[$key] = $value->format('d.m.Y H:i:s');
             } elseif ($key === 'UF_CONTRACT_FILE' && !empty($value)) {
                 $fileArray = \CFile::GetFileArray($value);
                 if ($fileArray) {
@@ -775,8 +932,12 @@ class HLApiHandler
                     ];
                 }
             } elseif ($fieldType === 'money' && !empty($value)) {
-                // Разбираем формат Bitrix "сумма|валюта"
                 $output[$key] = $this->parseMoneyForOutput($value);
+            } elseif ($fieldType === 'money_minor') {
+                // Конвертация из копеек в рубли через brick/money
+                $output[$key] = $this->parseMoneyMinorForOutput($value);
+            } elseif ($fieldType === 'boolean') {
+                $output[$key] = (bool)$value;
             } else {
                 $output[$key] = $value;
             }
@@ -785,15 +946,8 @@ class HLApiHandler
         return $output;
     }
     
-    /**
-     * Парсинг значения типа "деньги" для вывода
-     * 
-     * @param mixed $value Значение из БД (может быть строкой "100.50|RUB" или массивом)
-     * @return array Массив с value и currency
-     */
     private function parseMoneyForOutput($value): array
     {
-        // Если значение уже массив (некоторые версии Bitrix возвращают так)
         if (is_array($value)) {
             return [
                 'value' => floatval($value['VALUE'] ?? $value['SUM'] ?? 0),
@@ -802,7 +956,6 @@ class HLApiHandler
             ];
         }
         
-        // Разбираем строку "100.50|RUB"
         if (is_string($value) && strpos($value, '|') !== false) {
             list($amount, $currency) = explode('|', $value, 2);
             $floatAmount = floatval($amount);
@@ -814,13 +967,52 @@ class HLApiHandler
             ];
         }
         
-        // Если просто число
         $floatAmount = floatval($value);
         return [
             'value' => $floatAmount,
             'currency' => 'RUB',
             'formatted' => number_format($floatAmount, 2, '.', ' ') . ' ₽',
         ];
+    }
+    
+    /**
+     * Конвертация из копеек (minor units) в рубли через brick/money
+     * @param int|null $minorAmount Сумма в копейках
+     * @return array
+     */
+    private function parseMoneyMinorForOutput($minorAmount): array
+    {
+        if (empty($minorAmount) && $minorAmount !== 0) {
+            return [
+                'minor' => 0,
+                'value' => '0.00',
+                'currency' => 'RUB',
+                'formatted' => '0,00 ₽',
+            ];
+        }
+        
+        $intAmount = (int)$minorAmount;
+        
+        try {
+            $money = Money::ofMinor($intAmount, 'RUB');
+            $decimalValue = $money->getAmount()->toScale(2);
+            
+            return [
+                'minor' => $intAmount,
+                'value' => (string)$decimalValue,
+                'currency' => 'RUB',
+                'formatted' => number_format((float)(string)$decimalValue, 2, ',', ' ') . ' ₽',
+            ];
+        } catch (\Exception $e) {
+            // Fallback без brick/money
+            $rubles = $intAmount / 100;
+            return [
+                'minor' => $intAmount,
+                'value' => number_format($rubles, 2, '.', ''),
+                'currency' => 'RUB',
+                'formatted' => number_format($rubles, 2, ',', ' ') . ' ₽',
+            ];
+        }
     }
     
     private function actionAdd($request, $hlBlockId): void
@@ -845,10 +1037,167 @@ class HLApiHandler
         }
     }
     
+    /**
+     * Массовое добавление записей
+     */
+    private function actionBatchAdd($request, $hlBlockId): void
+    {
+        $entityClass = $this->getEntityClass($hlBlockId);
+        $items = $this->getParam($request, 'items');
+        
+        if (!is_array($items) || empty($items)) {
+            $this->sendError('Параметр items должен быть непустым массивом', 400);
+        }
+        
+        $maxBatchSize = 1000;
+        if (count($items) > $maxBatchSize) {
+            $this->sendError("Максимальный размер пакета: {$maxBatchSize} записей", 400);
+        }
+        
+        AddMessage2Log("[BATCH_ADD] Items count: " . count($items) . ", HL Block: {$hlBlockId}", 'hl_api');
+        
+        $results = [
+            'success' => [],
+            'errors' => [],
+        ];
+        
+        $connection = Application::getConnection();
+        $connection->startTransaction();
+        
+        try {
+            foreach ($items as $index => $itemData) {
+                $this->validator->clearErrors();
+                
+                if (!$this->validateFields($hlBlockId, $itemData, false)) {
+                    $results['errors'][] = [
+                        'index' => $index,
+                        'errors' => $this->validator->getErrors(),
+                    ];
+                    continue;
+                }
+                
+                $preparedFields = $this->prepareFields($hlBlockId, $itemData);
+                $result = $entityClass::add($preparedFields);
+                
+                if ($result->isSuccess()) {
+                    $results['success'][] = [
+                        'index' => $index,
+                        'id' => $result->getId(),
+                    ];
+                } else {
+                    $results['errors'][] = [
+                        'index' => $index,
+                        'errors' => $result->getErrorMessages(),
+                    ];
+                }
+            }
+            
+            $allOrNothing = $this->getParam($request, 'all_or_nothing', false);
+            if ($allOrNothing && !empty($results['errors'])) {
+                $connection->rollbackTransaction();
+                $this->sendError('Транзакция отменена из-за ошибок', 400, $results);
+            }
+            
+            $connection->commitTransaction();
+            
+            $this->logAction('batch_add', $hlBlockId, 0, ['count' => count($results['success'])]);
+            
+            $this->sendSuccess([
+                'added' => count($results['success']),
+                'failed' => count($results['errors']),
+                'results' => $results,
+            ]);
+            
+        } catch (\Exception $e) {
+            $connection->rollbackTransaction();
+            AddMessage2Log("[BATCH_ADD] Exception: " . $e->getMessage(), 'hl_api');
+            $this->sendError('Ошибка при массовом добавлении: ' . $e->getMessage(), 500);
+        }
+    }
+    
+    /**
+     * Массовое обновление записей
+     */
+    private function actionBatchUpdate($request, $hlBlockId): void
+    {
+        $entityClass = $this->getEntityClass($hlBlockId);
+        $items = $this->getParam($request, 'items');
+        
+        if (!is_array($items) || empty($items)) {
+            $this->sendError('Параметр items должен быть непустым массивом', 400);
+        }
+        
+        AddMessage2Log("[BATCH_UPDATE] Items count: " . count($items) . ", HL Block: {$hlBlockId}", 'hl_api');
+        
+        $results = [
+            'success' => [],
+            'errors' => [],
+        ];
+        
+        foreach ($items as $index => $itemData) {
+            $itemId = intval($itemData['id'] ?? $itemData['ID'] ?? $itemData['itemId'] ?? 0);
+            
+            if (!$itemId) {
+                $results['errors'][] = [
+                    'index' => $index,
+                    'error' => 'Не указан ID записи',
+                ];
+                continue;
+            }
+            
+            $existing = $entityClass::getById($itemId)->fetch();
+            if (!$existing) {
+                $results['errors'][] = [
+                    'index' => $index,
+                    'id' => $itemId,
+                    'error' => 'Запись не найдена',
+                ];
+                continue;
+            }
+            
+            unset($itemData['id'], $itemData['ID'], $itemData['itemId']);
+            
+            $this->validator->clearErrors();
+            if (!$this->validateFields($hlBlockId, $itemData, true)) {
+                $results['errors'][] = [
+                    'index' => $index,
+                    'id' => $itemId,
+                    'errors' => $this->validator->getErrors(),
+                ];
+                continue;
+            }
+            
+            $preparedFields = $this->prepareFields($hlBlockId, $itemData);
+            $result = $entityClass::update($itemId, $preparedFields);
+            
+            if ($result->isSuccess()) {
+                $results['success'][] = ['index' => $index, 'id' => $itemId];
+            } else {
+                $results['errors'][] = [
+                    'index' => $index,
+                    'id' => $itemId,
+                    'errors' => $result->getErrorMessages(),
+                ];
+            }
+        }
+        
+        $this->logAction('batch_update', $hlBlockId, 0, ['count' => count($results['success'])]);
+        
+        $this->sendSuccess([
+            'updated' => count($results['success']),
+            'failed' => count($results['errors']),
+            'results' => $results,
+        ]);
+    }
+    
     private function actionUpdate($request, $hlBlockId): void
     {
         $entityClass = $this->getEntityClass($hlBlockId);
-        $itemId = intval($this->getParam($request, 'itemId', 0));
+        $itemId = intval(
+            $this->getParam($request, 'id', 0) 
+            ?: $this->getParam($request, 'ID', 0) 
+            ?: $this->getParam($request, 'itemId', 0)
+        );
         
         if (!$itemId) {
             $this->sendError('Не указан ID элемента', 400);
@@ -893,7 +1242,11 @@ class HLApiHandler
     private function actionDelete($request, $hlBlockId): void
     {
         $entityClass = $this->getEntityClass($hlBlockId);
-        $itemId = intval($this->getParam($request, 'itemId', 0));
+        $itemId = intval(
+            $this->getParam($request, 'id', 0) 
+            ?: $this->getParam($request, 'ID', 0) 
+            ?: $this->getParam($request, 'itemId', 0)
+        );
         
         if (!$itemId) {
             $this->sendError('Не указан ID элемента', 400);
@@ -926,7 +1279,6 @@ class HLApiHandler
             }
         }
         
-        // Автозаполнение UF_COMPANY_ID из companyId (для веб-интерфейса)
         if (empty($fields['UF_COMPANY_ID'])) {
             $companyId = $this->getParam($request, 'companyId');
             if (!empty($companyId)) {
